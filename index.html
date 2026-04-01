@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Roomio — Professional zero-install 2D architectural floor plan designer with Vastu grid support.">
+    <meta name="theme-color" content="#121214">
+    <title>Roomio — 2D Floor Plan Designer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Toggle (visible when sidebar collapsed) -->
+        <button class="sidebar-toggle-btn hidden" id="sidebar-toggle-btn" title="Show Sidebar">
+            <i data-lucide="panel-left" style="width:18px;height:18px;"></i>
+        </button>
+
+        <!-- Sidebar Toolbar -->
+        <aside class="toolbar" id="main-toolbar">
+            <div class="brand">
+                <i data-lucide="home"></i>
+                <h1>Dream Home Planner</h1>
+                <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse Sidebar">
+                    <i data-lucide="panel-left-close" style="width:16px;height:16px;"></i>
+                </button>
+            </div>
+
+            <div class="tools-group">
+                <h3>Tools</h3>
+                <button class="tool-btn active" data-tool="select" title="Select Tool">
+                    <i data-lucide="mouse-pointer-2"></i> Select
+                </button>
+                <button class="tool-btn" data-tool="pan" title="Pan Canvas">
+                    <i data-lucide="hand"></i> Pan
+                </button>
+                <button class="tool-btn" data-tool="wall" title="Draw Wall">
+                    <i data-lucide="pen-tool"></i> Wall
+                </button>
+                <button class="tool-btn" data-tool="room" title="Draw Room">
+                    <i data-lucide="square"></i> Room
+                </button>
+                <div style="height: 1px; background: var(--border-light); margin: 8px 0;"></div>
+
+                <!-- Collapsible Elements Section -->
+                <div class="elements-header" id="elements-header">
+                    <span>Elements</span>
+                    <i data-lucide="chevron-down" class="elements-chevron" id="elements-chevron" style="width:14px;height:14px;"></i>
+                </div>
+                <div class="elements-body" id="elements-body">
+                    <button class="tool-btn" data-tool="door" title="Add Door">
+                        <i data-lucide="door-open"></i> Door
+                    </button>
+                    <button class="tool-btn" data-tool="window" title="Add Window">
+                        <i data-lucide="app-window"></i> Window
+                    </button>
+                    <button class="tool-btn" data-tool="stairs" title="Add Stairs">
+                        <i data-lucide="align-justify"></i> Stairs
+                    </button>
+                    <button class="tool-btn" data-tool="bed" title="Add Bed">
+                        <i data-lucide="bed"></i> Bed
+                    </button>
+                    <button class="tool-btn" data-tool="table" title="Add Table">
+                        <i data-lucide="circle"></i> Table
+                    </button>
+                    <button class="tool-btn" data-tool="bookshelf" title="Add Bookshelf">
+                        <i data-lucide="library"></i> Bookshelf
+                    </button>
+                    <button class="tool-btn" data-tool="commode" title="Add Commode">
+                        <i data-lucide="bath"></i> Commode
+                    </button>
+                    <button class="tool-btn" data-tool="washing_machine" title="Add Washer">
+                        <i data-lucide="droplet"></i> Washer
+                    </button>
+                    <button class="tool-btn" data-tool="chair" title="Add Chair">
+                        <i data-lucide="armchair"></i> Chair
+                    </button>
+                    <button class="tool-btn" data-tool="sofa" title="Add Sofa">
+                        <i data-lucide="sofa"></i> Sofa
+                    </button>
+                    <button class="tool-btn" data-tool="text" title="Add Text Label">
+                        <i data-lucide="type"></i> Text
+                    </button>
+                </div>
+
+                <button class="tool-btn" data-tool="delete" title="Delete Selected">
+                    <i data-lucide="trash-2"></i> Delete
+                </button>
+            </div>
+
+            <div class="tools-group">
+                <h3>Settings</h3>
+                <button class="tool-btn" id="toggle-vastu"
+                    style="margin-bottom: 12px; justify-content: center; width: 100%; border: 1px solid var(--border-light); background: rgba(99, 102, 241, 0.1); color: var(--primary);">
+                    <i data-lucide="grid"></i> Show Vastu Grid
+                </button>
+                <div class="setting-item">
+                    <label for="north-angle">North Offset Angle</label>
+                    <div class="slider-container">
+                        <input type="range" id="north-angle" min="0" max="359" value="0">
+                        <span id="north-angle-val">0&deg;</span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="wall-thickness">Wall Thickness</label>
+                    <div class="slider-container">
+                        <input type="range" id="wall-thickness" min="1" max="36" value="9">
+                        <span id="thickness-val">9"</span>
+                    </div>
+
+                    <label for="wall-line-type" style="margin-top: 12px; display: block;">Line Type</label>
+                    <select id="wall-line-type"
+                        style="width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-main); padding: 6px; margin-top: 4px;">
+                        <option value="solid">Solid</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+
+                    <label for="bg-color" style="margin-top: 12px; display: block;">Background Color</label>
+                    <input type="color" id="bg-color" value="#1e1e22"
+                        style="width: 100%; height: 32px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; margin-top: 4px;">
+                </div>
+            </div>
+
+            <div class="toolbar-section">
+                <button class="action-btn" id="save-json-btn" title="Save Project (JSON)">
+                    <i data-lucide="save"></i> Save Project
+                </button>
+                <div style="position: relative;">
+                    <input type="file" id="load-json-input" accept=".json"
+                        style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; left: 0; top: 0;">
+                    <button class="action-btn" id="load-json-btn" title="Load Project (JSON)" style="width: 100%;">
+                        <i data-lucide="folder-open"></i> Load Project
+                    </button>
+                </div>
+                <button class="action-btn" id="export-btn" title="Export as PNG">
+                    <i data-lucide="download"></i> Export PNG
+                </button>
+                <button class="action-btn" id="toggle-json-sidebar" title="Toggle Live Editor">
+                    <i data-lucide="code"></i> Live Editor
+                </button>
+                <button class="action-btn" id="clear-btn" title="Clear Canvas">
+                    <i data-lucide="trash"></i> Clear All
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="canvas-container">
+            <!-- Tab Bar -->
+            <div class="tab-bar" id="tab-bar">
+                <div class="tab-list" id="tab-list">
+                    <div class="tab active" data-tab-id="0">
+                        <span class="tab-name">Design 1</span>
+                        <button class="tab-close" title="Close tab">&times;</button>
+                    </div>
+                </div>
+                <button class="tab-add" id="tab-add" title="New Design"><i data-lucide="plus"
+                        style="width:14px;height:14px;"></i></button>
+            </div>
+
+            <canvas id="design-canvas"></canvas>
+
+            <div class="compass-overlay" aria-label="Compass pointing North up">
+                <div class="compass-ring">
+                    <span class="compass-label n">N</span>
+                    <span class="compass-label e">E</span>
+                    <span class="compass-label s">S</span>
+                    <span class="compass-label w">W</span>
+                    <div class="compass-needle"></div>
+                </div>
+            </div>
+
+            <div class="properties-panel" id="properties-panel">
+                <div class="properties-header" id="properties-header">
+                    <h3>Properties</h3>
+                    <button class="prop-minimize-btn" id="prop-minimize-btn" title="Minimize">
+                        <i data-lucide="minus" style="width:14px;height:14px;"></i>
+                    </button>
+                </div>
+                <div class="properties-body" id="properties-body">
+                    <div id="selection-info">No item selected.</div>
+                    <div id="item-properties" style="display: none; margin-top: 12px;">
+                        <div class="setting-item" id="edit-thickness-container"
+                            style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                            <label>Edit Thickness</label>
+                            <div class="slider-container">
+                                <input type="range" id="edit-wall-thickness" min="1" max="36" value="9">
+                                <span id="edit-thickness-val">9"</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item" id="edit-line-type-container"
+                            style="display: none; margin-top: 12px; padding-top: 4px;">
+                            <label>Line Type</label>
+                            <select id="edit-wall-line-type"
+                                style="width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-main); padding: 6px; margin-top: 4px;">
+                                <option value="solid">Solid</option>
+                                <option value="dotted">Dotted</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item" id="edit-altitude-container"
+                            style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                            <label>Wall Altitude (Height)</label>
+                            <div class="slider-container">
+                                <input type="range" id="edit-wall-altitude" min="1" max="30" value="8" step="0.5">
+                                <span id="edit-altitude-val">8ft</span>
+                            </div>
+                        </div>
+
+                        <!-- Text edit container (shown for text objects) -->
+                        <div class="setting-item" id="edit-text-container"
+                            style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                            <label>Text Content</label>
+                            <input type="text" id="edit-text-content" placeholder="Enter text..."
+                                style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border-color);background:rgba(0,0,0,0.2);color:var(--text-main);font-family:inherit;font-size:13px;outline:none;">
+                            <label style="margin-top:8px;">Font Size</label>
+                            <div class="slider-container">
+                                <input type="range" id="edit-text-size" min="8" max="72" value="16">
+                                <span id="edit-text-size-val">16px</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item" id="rotate-container"
+                            style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                            <button id="rotate-btn"
+                                style="background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; width: 100%;">
+                                <i data-lucide="rotate-cw" style="width: 16px; height: 16px;"></i> Rotate 90&deg;
+                            </button>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <button id="flip-h-btn"
+                                    style="flex: 1; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-family: 'Inter', sans-serif;">
+                                    <i data-lucide="split-square-horizontal"
+                                        style="width: 14px; height: 14px;"></i>
+                                    Flip H
+                                </button>
+                                <button id="flip-v-btn"
+                                    style="flex: 1; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-family: 'Inter', sans-serif;">
+                                    <i data-lucide="split-square-vertical"
+                                        style="width: 14px; height: 14px;"></i> Flip
+                                    V
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 11px; margin-top: 24px; color: #94a3b8; line-height: 1.5;">
+                        Select tool allows moving objects with drag and drop. Hit 'Delete' or 'Backspace' to remove
+                        selected
+                        items. Scroll to zoom and middle-click (or alt-click) to pan.
+                    </p>
+                </div>
+            </div>
+
+            <div class="zoom-controls"
+                style="position: absolute; bottom: 24px; right: 24px; display: flex; gap: 4px; background: var(--panel-bg); padding: 6px; border-radius: 8px; border: 1px solid var(--border-light); z-index: 10;">
+                <button class="tool-btn" id="zoom-out" title="Zoom Out" style="padding: 8px;"><i data-lucide="minus"
+                        style="width: 16px; height: 16px;"></i></button>
+                <div id="zoom-val"
+                    style="display: flex; align-items: center; justify-content: center; width: 40px; font-size: 12px; font-weight: 500; font-family: monospace;">
+                    100%</div>
+                <button class="tool-btn" id="zoom-in" title="Zoom In" style="padding: 8px;"><i data-lucide="plus"
+                        style="width: 16px; height: 16px;"></i></button>
+                <button class="tool-btn" id="zoom-reset" title="Reset View" style="padding: 8px;"><i
+                        data-lucide="maximize" style="width: 16px; height: 16px;"></i></button>
+            </div>
+        </main>
+
+        <!-- Floating Live Editor Window -->
+        <div class="floating-editor hidden" id="json-sidebar">
+            <div class="floating-editor-titlebar" id="floating-editor-titlebar">
+                <h3>Live JSON Editor</h3>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span id="json-status" class="status-badge success">Valid</span>
+                    <button class="floating-editor-close" id="floating-editor-close" title="Close">&times;</button>
+                </div>
+            </div>
+            <textarea id="json-editor" class="code-editor" spellcheck="false" placeholder="[]"></textarea>
+            <div class="floating-editor-resize" id="floating-editor-resize"></div>
+        </div>
+    </div>
+
+    <!-- Core modules (load order matters) -->
+    <script src="event-bus.js"></script>
+    <script src="elements.js"></script>
+    <script src="canvas-engine.js"></script>
+    <script src="tools.js"></script>
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

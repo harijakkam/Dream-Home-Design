@@ -1,0 +1,16 @@
+{
+  "name": "roomio",
+  "version": "2.0.0",
+  "description": "Professional zero-install 2D architectural floor plan designer with Vastu grid support",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y live-server --port=3000 --open=index.html",
+    "dev": "npx -y live-server --port=3000 --open=index.html",
+    "preview": "npx -y http-server -p 3000 -o",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": ["floor-plan", "architectural-design", "2d-designer", "vastu", "canvas"],
+  "author": "",
+  "license": "MIT",
+  "private": true
+}

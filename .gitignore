@@ -1,0 +1,21 @@
+# Roomio - 2D Floor Plan Designer
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backups
+v1.0/
+
+# Misc
+*.log
