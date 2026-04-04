@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/dependencies-zero-f59e0b?style=for-the-badge" alt="Dependencies">
 </p>
 
-# 🏠 Roomio — 2D Floor Plan Designer
+# 🏠 Dream Home Designer
 
 A **professional, zero-install** browser-based architectural floor plan designer with Vastu grid support, multi-tab workspaces, and a live JSON editor. Built entirely with vanilla HTML5 Canvas, CSS, and JavaScript — no frameworks, no build step, no backend.
 
@@ -19,6 +19,7 @@ A **professional, zero-install** browser-based architectural floor plan designer
 - **Wall Tool** — Draw walls with configurable thickness (1–36 inches), solid or dotted line styles, and altitude metadata
 - **Room Tool** — Drag to create rectangular rooms with live dimension display
 - **Measurement Tool** — Non-structural measurement lines with architectural notation
+- **Area Measurement Tool** — Draw custom closed shapes to calculate precise areas (sq. ft) using the Shoelace formula
 - **Text Labels** — Place editable text annotations with adjustable font size (8–72px)
 
 ### 🪑 Furniture & Elements
@@ -43,6 +44,9 @@ A **professional, zero-install** browser-based architectural floor plan designer
 - **Rotate & Flip** — 90° rotation, horizontal/vertical flip for all objects
 - **Resize handles** — Drag corners to resize rooms, objects, and wall endpoints
 - **Zoom & Pan** — Scroll to zoom, middle-click or Alt+drag to pan, space+drag to pan
+- **Zoom to Fit** — One-click button (or load-time auto-trigger) to perfectly center and scale your design
+- **Direct Zoom Input** — Type specific zoom percentages (e.g., 150%) directly into the interface
+- **Grid Toggle** — Instantly hide or show architectural grid lines for cleaner design previews
 - **Grid snapping** — 1-inch precision architectural snapping
 - **Background color** — Fully customizable with automatic contrast adaptation
 
@@ -65,9 +69,11 @@ A **professional, zero-install** browser-based architectural floor plan designer
 - **Floating JSON Editor** — Draggable, resizable live editor window with JSON validation
 
 ### 💾 Project I/O
-- **Save** — Export the current scene as a timestamped `.json` file
-- **Load** — Import any previously saved `.json` project
-- **Export PNG** — Render the design to a downloadable image
+- **Enforced Encryption** — All designs are saved as encrypted `.rproj` files for secure design portability
+- **Automatic Auto-Fit** — Projects automatically zoom-to-fit upon loading for immediate visibility
+- **Save** — Export high-security timestamped design packages
+- **Load** — Import previously saved project files with one click
+- **Export PNG** — Render the design to a professional-grade downloadable image
 - **Live JSON Editor** — Edit the raw scene array in real-time with validation feedback
 
 ---
@@ -182,7 +188,9 @@ Each module depends only on the ones loaded before it.
 | `Ctrl+V` | Paste with offset |
 | `Delete` / `Backspace` | Delete selected |
 | `Escape` | Clear selection / cancel drawing |
+| `Enter` | Close polygon (Area Tool) |
 | `Space` (hold) | Temporary pan mode |
+| `a` | Switch to Area Tool |
 | `Shift+Click` | Add to selection |
 | `Alt+Drag` | Pan canvas |
 | `Scroll` | Zoom in/out |
