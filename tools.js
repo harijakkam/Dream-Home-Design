@@ -73,6 +73,77 @@ class ToolsManager {
         return { x, y };
     }
 
+    getSnapPoint(x, y) {
+        const threshold = 15 / this.engine.scale;
+        for (const item of this.engine.scene) {
+            if (item.type === 'wall' || item.type === 'measure') {
+                // Center Snaps
+                if (Math.hypot(item.startX - x, item.startY - y) < threshold) return { x: item.startX, y: item.startY };
+                if (Math.hypot(item.endX - x, item.endY - y) < threshold) return { x: item.endX, y: item.endY };
+                
+                // Face Snaps (Side Snapping)
+                if (item.type === 'wall' && item.thickness > 0) {
+                    const dx = item.endX - item.startX;
+                    const dy = item.endY - item.startY;
+                    const len = Math.sqrt(dx*dx + dy*dy);
+                    if (len > 0) {
+                        const nx = -dy / len;
+                        const ny = dx / len;
+                        const off = item.thickness / 2;
+                        const faces = [{x:item.startX+nx*off, y:item.startY+ny*off}, {x:item.startX-nx*off, y:item.startY-ny*off},
+                                       {x:item.endX+nx*off, y:item.endY+ny*off}, {x:item.endX-nx*off, y:item.endY-ny*off}];
+                        for (const f of faces) {
+                            if (Math.hypot(f.x - x, f.y - y) < threshold) return f;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    getAxisAlignments(x, y) {
+        const threshold = 5 / this.engine.scale;
+        const aligns = { x: null, y: null };
+        
+        for (const item of this.engine.scene) {
+            const points = [];
+            if (item.type === 'wall' || item.type === 'measure') {
+                points.push({ x: item.startX, y: item.startY }, { x: item.endX, y: item.endY });
+                
+                // Add Face Alignment Points (for different wall thicknesses)
+                if (item.type === 'wall' && item.thickness > 0) {
+                    const dx = item.endX - item.startX;
+                    const dy = item.endY - item.startY;
+                    const len = Math.sqrt(dx*dx + dy*dy);
+                    if (len > 0) {
+                        const nx = -dy / len; // Normal X
+                        const ny = dx / len;  // Normal Y
+                        const off = item.thickness / 2;
+                        
+                        // Faces at each end
+                        points.push({ x: item.startX + nx*off, y: item.startY + ny*off });
+                        points.push({ x: item.startX - nx*off, y: item.startY - ny*off });
+                        points.push({ x: item.endX + nx*off, y: item.endY + ny*off });
+                        points.push({ x: item.endX - nx*off, y: item.endY - ny*off });
+                    }
+                }
+            } else if (item.type === 'room' || item.type === 'object') {
+                points.push({ x: item.x, y: item.y }, { x: item.x + item.width, y: item.y + item.height });
+                // Also center points
+                points.push({ x: item.x + item.width / 2, y: item.y + item.height / 2 });
+            } else if (item.type === 'area_measure') {
+                points.push(...item.points);
+            }
+
+            for (const p of points) {
+                if (Math.abs(p.x - x) < threshold) aligns.x = p.x;
+                if (Math.abs(p.y - y) < threshold) aligns.y = p.y;
+            }
+        }
+        return aligns;
+    }
+
     onMouseDown(e) {
         if(e.button !== 0 || e.altKey || this.engine.isPanning) return; // Left click only and not panning
         
@@ -101,9 +172,15 @@ class ToolsManager {
             
             if (handleHit) {
                 this.state.isResizing = true;
-                this.state.resizeHandle = handleHit.handle;
-                this.state.dragItem = handleHit.item;
-                this.state.origProps = { ...handleHit.item };
+                this.state.resizeItem = handleHit.item;
+                this.state.handleId = handleHit.handle;
+                this.state.initialItemProps = { ...handleHit.item };
+                
+                // Track initial position for sticky joints
+                if (handleHit.item.type === 'wall' || handleHit.item.type === 'measure') {
+                    this.state.initialHandleX = handleHit.handle === 'start' ? handleHit.item.startX : handleHit.item.endX;
+                    this.state.initialHandleY = handleHit.handle === 'start' ? handleHit.item.startY : handleHit.item.endY;
+                }
                 this.engine.selectItem(handleHit.item);
             } else if (hit) {
                 // Determine if we need to add to selection or set new selection
@@ -130,11 +207,17 @@ class ToolsManager {
             }
         } 
         else if (this.currentTool === 'wall' || this.currentTool === 'measure') {
+            const snap = this.getSnapPoint(x, y);
+            const aligns = this.getAxisAlignments(x, y);
+            
+            let startX = snap ? snap.x : (aligns.x !== null ? aligns.x : x);
+            let startY = snap ? snap.y : (aligns.y !== null ? aligns.y : y);
+            
             this.state.isDrawing = true;
-            this.state.startX = x;
-            this.state.startY = y;
-            this.state.endX = x;
-            this.state.endY = y;
+            this.state.startX = startX;
+            this.state.startY = startY;
+            this.state.endX = startX;
+            this.state.endY = startY;
         }
         else if (this.currentTool === 'room') {
             this.state.isDrawing = true;
@@ -207,32 +290,57 @@ class ToolsManager {
                 this.state.endY = y;
                 this.engine.render();
             } else if (this.state.isResizing) {
-                const item = this.state.dragItem;
-                const orig = this.state.origProps;
-                
+                const item = this.state.resizeItem;
+                const handle = this.state.handleId;
+                const snap = this.getSnapPoint(x, y);
+                const aligns = this.getAxisAlignments(x, y);
+                const targetX = snap ? snap.x : (aligns.x !== null ? aligns.x : x);
+                const targetY = snap ? snap.y : (aligns.y !== null ? aligns.y : y);
+
                 if (item.type === 'wall' || item.type === 'measure') {
-                    if (this.state.resizeHandle === 'start') {
-                        item.startX = x;
-                        item.startY = y;
-                    } else if (this.state.resizeHandle === 'end') {
-                        item.endX = x;
-                        item.endY = y;
+                    const oldX = handle === 'start' ? item.startX : item.endX;
+                    const oldY = handle === 'start' ? item.startY : item.endY;
+
+                    if (handle === 'start') {
+                        item.startX = targetX;
+                        item.startY = targetY;
+                    } else {
+                        item.endX = targetX;
+                        item.endY = targetY;
+                    }
+
+                    // Sticky Joins: Move connected walls together
+                    if (this.engine.stickyWalls && this.state.initialHandleX !== undefined) {
+                        for (const other of this.engine.scene) {
+                            if (other === item) continue;
+                            if (other.type === 'wall' || other.type === 'measure') {
+                                if (other.startX === oldX && other.startY === oldY) {
+                                    other.startX = targetX;
+                                    other.startY = targetY;
+                                }
+                                if (other.endX === oldX && other.endY === oldY) {
+                                    other.endX = targetX;
+                                    other.endY = targetY;
+                                }
+                            }
+                        }
                     }
                 } else if (item.type === 'room' || item.type === 'object') {
-                    if (this.state.resizeHandle === 'br') {
+                    const orig = this.state.initialItemProps;
+                    if (handle === 'br') {
                         item.width = Math.max(10, x - item.x);
                         item.height = Math.max(10, y - item.y);
-                    } else if (this.state.resizeHandle === 'tl') {
+                    } else if (handle === 'tl') {
                         const newW = orig.width + (orig.x - x);
                         const newH = orig.height + (orig.y - y);
                         if (newW >= 10) { item.x = x; item.width = newW; }
                         if (newH >= 10) { item.y = y; item.height = newH; }
-                    } else if (this.state.resizeHandle === 'tr') {
+                    } else if (handle === 'tr') {
                         const newW = Math.max(10, x - item.x);
                         const newH = orig.height + (orig.y - y);
                         item.width = newW;
                         if (newH >= 10) { item.y = y; item.height = newH; }
-                    } else if (this.state.resizeHandle === 'bl') {
+                    } else if (handle === 'bl') {
                         const newW = orig.width + (orig.x - x);
                         const newH = Math.max(10, y - item.y);
                         if (newW >= 10) { item.x = x; item.width = newW; }
@@ -242,8 +350,13 @@ class ToolsManager {
                 this.engine.render();
                 if (this.engine.onSelectionChange) this.engine.onSelectionChange(this.engine.selectedItems);
             } else if (this.state.isDragging) {
-                const dx = x - this.state.startX;
-                const dy = y - this.state.startY;
+                const snap = this.getSnapPoint(x, y);
+                const aligns = this.getAxisAlignments(x, y);
+                const tx = snap ? snap.x : (aligns.x !== null ? aligns.x : x);
+                const ty = snap ? snap.y : (aligns.y !== null ? aligns.y : y);
+                
+                const dx = tx - this.state.startX;
+                const dy = ty - this.state.startY;
                 
                 for (const {item, orig} of this.state.origPropsArray) {
                     if (item.type === 'room' || item.type === 'object') {
@@ -275,8 +388,10 @@ class ToolsManager {
             }
         } 
         else if ((this.currentTool === 'wall' || this.currentTool === 'measure') && this.state.isDrawing) {
-            this.state.endX = x;
-            this.state.endY = y;
+            const snap = this.getSnapPoint(x, y);
+            const aligns = this.getAxisAlignments(x, y);
+            this.state.endX = snap ? snap.x : (aligns.x !== null ? aligns.x : x);
+            this.state.endY = snap ? snap.y : (aligns.y !== null ? aligns.y : y);
             this.engine.render();
         }
         else if (this.currentTool === 'room' && this.state.isDrawing) {
@@ -486,6 +601,48 @@ class ToolsManager {
     }
 
     drawOverlay(ctx) {
+        // Draw snap point indicator and axis alignment guides
+        if (this.currentTool !== 'pan') {
+            const mx = this.engine.mouseX;
+            const my = this.engine.mouseY;
+            const snap = this.getSnapPoint(mx, my);
+            const aligns = this.getAxisAlignments(mx, my);
+
+            ctx.save();
+            ctx.lineWidth = 1 / this.engine.scale;
+            ctx.setLineDash([4 / this.engine.scale, 4 / this.engine.scale]);
+            ctx.strokeStyle = '#38bdf8'; // Sky-400 for smart guides
+
+            const startX = -this.engine.offsetX / this.engine.scale;
+            const endX = startX + this.engine.canvas.width / this.engine.scale;
+            const startY = -this.engine.offsetY / this.engine.scale;
+            const endY = startY + this.engine.canvas.height / this.engine.scale;
+
+            if (aligns.x !== null) {
+                ctx.beginPath();
+                ctx.moveTo(aligns.x, startY);
+                ctx.lineTo(aligns.x, endY);
+                ctx.stroke();
+            }
+            if (aligns.y !== null) {
+                ctx.beginPath();
+                ctx.moveTo(startX, aligns.y);
+                ctx.lineTo(endX, aligns.y);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            if (snap) {
+                ctx.save();
+                ctx.strokeStyle = '#22c55e'; // Green for snap
+                ctx.lineWidth = 2 / this.engine.scale;
+                ctx.beginPath();
+                ctx.arc(snap.x, snap.y, 6 / this.engine.scale, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
         if (this.state.isMarquee) {
             ctx.save();
             ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';

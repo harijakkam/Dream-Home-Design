@@ -169,11 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isDragging) return;
             let newX = e.clientX - dragOffX;
             let newY = e.clientY - dragOffY;
-            
+
             // Clamp to viewport
             newX = Math.max(0, Math.min(newX, window.innerWidth - propPanel.offsetWidth));
             newY = Math.max(0, Math.min(newY, window.innerHeight - 40));
-            
+
             propPanel.style.left = newX + 'px';
             propPanel.style.top = newY + 'px';
             propPanel.style.right = 'auto';
@@ -189,23 +189,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==================== COLLAPSIBLE SIDEBAR ====================
+    // ==================== COLLAPSIBLE SIDEBAR OVERLAY ====================
     const mainToolbar = document.getElementById('main-toolbar');
     const sidebarCollapseBtn = document.getElementById('sidebar-collapse-btn');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
 
-    if (sidebarCollapseBtn && mainToolbar && sidebarToggleBtn) {
-        sidebarCollapseBtn.addEventListener('click', () => {
+    const forceCollapseSidebar = () => {
+        if (!mainToolbar.classList.contains('collapsed')) {
             mainToolbar.classList.add('collapsed');
-            sidebarToggleBtn.classList.remove('hidden');
+            if (sidebarToggleBtn) sidebarToggleBtn.classList.remove('hidden');
             setTimeout(() => engine.resize(), 300);
+        }
+    };
+
+    if (sidebarCollapseBtn && mainToolbar) {
+        sidebarCollapseBtn.addEventListener('click', () => {
+            forceCollapseSidebar();
         });
+    }
+
+    if (sidebarToggleBtn && mainToolbar) {
         sidebarToggleBtn.addEventListener('click', () => {
             mainToolbar.classList.remove('collapsed');
             sidebarToggleBtn.classList.add('hidden');
+            // Re-render engine scale after layout reflow
             setTimeout(() => engine.resize(), 300);
         });
     }
+
+    // Auto-hide sidebar when using Header Bar operations
+    document.querySelectorAll('.win-menu-bar .menu-item').forEach(menu => {
+        menu.addEventListener('mouseenter', forceCollapseSidebar);
+        menu.addEventListener('click', forceCollapseSidebar);
+    });
 
     // ==================== COLLAPSIBLE ELEMENTS ====================
     const elementsHeader = document.getElementById('elements-header');
@@ -378,23 +394,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (settings.northAngle !== undefined) {
             engine.northAngle = settings.northAngle;
-            if (northAngleInput) northAngleInput.value = settings.northAngle;
-            const northVal = document.getElementById('north-angle-val');
-            if (northVal) northVal.innerText = `${settings.northAngle}\u00b0`;
-            const ring = document.querySelector('.compass-ring');
-            if (ring) ring.style.transform = `rotate(${settings.northAngle}deg)`;
+            updateCompassUI(settings.northAngle);
         }
+        // Sync Menu UI
+        if (settings.theme) {
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(settings.theme === 'light' ? 'theme-light' : 'theme-dark');
+            const themeStatus = document.getElementById('theme-status');
+            if (themeStatus) themeStatus.innerText = settings.theme === 'light' ? 'Light' : 'Dark';
+        }
+
         if (settings.showVastu !== undefined) {
             engine.showVastu = settings.showVastu;
-            if (toggleVastuBtn) {
-                if (engine.showVastu) {
-                    toggleVastuBtn.style.background = 'var(--primary)';
-                    toggleVastuBtn.style.color = 'white';
-                } else {
-                    toggleVastuBtn.style.background = 'rgba(99, 102, 241, 0.1)';
-                    toggleVastuBtn.style.color = 'var(--primary)';
-                }
-            }
+        }
+        if (settings.showGrid !== undefined) {
+            engine.showGrid = settings.showGrid;
+        }
+        if (settings.showCrosshairs !== undefined) {
+            engine.showCrosshairs = settings.showCrosshairs;
+        }
+        if (settings.stickyWalls !== undefined) {
+            engine.stickyWalls = settings.stickyWalls;
         }
         if (settings.hideStructure !== undefined) {
             engine.hideStructure = settings.hideStructure;
@@ -422,6 +442,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        if (settings.showCrosshairs !== undefined) {
+            engine.showCrosshairs = settings.showCrosshairs;
+            const toggleCrosshairsBtn = document.getElementById('toggle-crosshairs');
+            if (toggleCrosshairsBtn) {
+                if (engine.showCrosshairs) {
+                    toggleCrosshairsBtn.style.background = 'var(--purple-600)';
+                    toggleCrosshairsBtn.style.color = 'white';
+                } else {
+                    toggleCrosshairsBtn.style.background = 'rgba(168, 85, 247, 0.1)';
+                    toggleCrosshairsBtn.style.color = '#a855f7';
+                }
+            }
+        }
+        if (settings.stickyWalls !== undefined) {
+            engine.stickyWalls = settings.stickyWalls;
+            const toggleStickyBtn = document.getElementById('toggle-sticky');
+            if (toggleStickyBtn) {
+                if (engine.stickyWalls) {
+                    toggleStickyBtn.style.background = '#84cc16';
+                    toggleStickyBtn.style.color = 'white';
+                } else {
+                    toggleStickyBtn.style.background = 'rgba(132, 204, 22, 0.1)';
+                    toggleStickyBtn.style.color = '#84cc16';
+                }
+            }
+        }
         if (settings.wallThickness !== undefined) {
             if (wallThicknessInput) wallThicknessInput.value = settings.wallThickness;
             if (thicknessVal) thicknessVal.innerText = `${settings.wallThickness}\"`;
@@ -445,25 +491,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             const project = {
-                version: '2.1.0',
+                version: CURRENT_VERSION,
                 projectName: getProjectName(),
                 activeDesignIndex: [...tabs.keys()].indexOf(activeTabId),
                 settings: {
+                    theme: document.body.classList.contains('theme-light') ? 'light' : 'dark',
                     bgColor: engine.bgColor || '#1e1e22',
                     northAngle: engine.northAngle || 0,
                     showVastu: engine.showVastu || false,
                     showGrid: engine.showGrid !== undefined ? engine.showGrid : true,
+                    showCrosshairs: engine.showCrosshairs || false,
+                    stickyWalls: engine.stickyWalls !== undefined ? engine.stickyWalls : true,
                     hideStructure: engine.hideStructure || false,
-                    wallThickness: parseInt(wallThicknessInput.value, 10) || 9,
-                    wallLineType: document.getElementById('wall-line-type')?.value || 'solid'
+                    wallThickness: parseInt(wallThicknessInput.value, 10) || 9
                 },
                 designs: designs
             };
-            const jsonStr = JSON.stringify(project, null, 2);
-            const shouldEncrypt = true; // Encryption is now enforced for all project saves.
 
+            const jsonStr = JSON.stringify(project, null, 2);
             let fileContent, fileExt;
-            if (shouldEncrypt && typeof RoomioCrypto !== 'undefined') {
+
+            if (document.getElementById('encrypt-toggle')?.checked) {
                 fileContent = await RoomioCrypto.encrypt(jsonStr);
                 fileExt = 'rproj';
             } else {
@@ -486,58 +534,127 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ---- Load: restores all designs, settings, and project name ----
-    function loadProjectFromJSON(parsed) {
+    const CURRENT_VERSION = '2.3.0';
+
+    function migrateProjectIfNeeded(parsedInput) {
+        if (!parsedInput) return null;
+        let parsed = parsedInput;
+
+        // Legacy V1 (Array-only) normalization
         if (Array.isArray(parsed)) {
-            // Legacy v1: flat scene array
-            engine.scene = parsed;
-            engine.clearSelection();
-            engine.render();
-            const td = tabs.get(activeTabId);
-            if (td) td.scene = JSON.parse(JSON.stringify(parsed));
-        } else if (parsed && parsed.designs && Array.isArray(parsed.designs)) {
-            // v2.1.0+: full project with multiple designs
-            if (parsed.projectName && projectNameInput) {
-                projectNameInput.value = parsed.projectName;
-            }
-            applySettings(parsed.settings || null);
-
-            tabs.clear();
-            tabCounter = 0;
-            for (const design of parsed.designs) {
-                const tid = tabCounter++;
-                tabs.set(tid, {
-                    name: design.name || `Design ${tid + 1}`,
-                    scene: design.scene || []
-                });
-            }
-            const targetIdx = parsed.activeDesignIndex || 0;
-            const keys = [...tabs.keys()];
-            activeTabId = keys[Math.min(targetIdx, keys.length - 1)] || keys[0];
-
-            const activeData = tabs.get(activeTabId);
-            engine.scene = JSON.parse(JSON.stringify(activeData.scene));
-            engine.clearSelection();
-            engine.undoStack = [];
-            engine.render();
-            renderTabBar();
-        } else if (parsed && parsed.scene && Array.isArray(parsed.scene)) {
-            // v2.0.0: single-scene project with settings
-            if (parsed.projectName && projectNameInput) {
-                projectNameInput.value = parsed.projectName;
-            }
-            applySettings(parsed.settings || null);
-            engine.scene = parsed.scene;
-            engine.clearSelection();
-            engine.render();
-            const td = tabs.get(activeTabId);
-            if (td) td.scene = JSON.parse(JSON.stringify(parsed.scene));
-        } else {
-            alert('Invalid project file format.');
-            return;
+            parsed = {
+                version: '1.0.0',
+                designs: [{
+                    id: 0,
+                    name: 'Imported v1 Design',
+                    scene: JSON.parse(JSON.stringify(parsed))
+                }],
+                settings: {}
+            };
         }
-        engine.zoomToFit();
-        updateJsonEditor();
+
+        const fileVersion = parsed.version || '1.0.0';
+
+        // If versions match exactly, no migration needed
+        if (fileVersion === CURRENT_VERSION) return parsed;
+
+        // USER ACCEPTANCE BANNER
+        const message = `Project Migration Available (v${fileVersion} → v${CURRENT_VERSION})\n\n` +
+            `Would you like to upgrade this project to the latest version?\n\n` +
+            `• Enables Sticky Wall Joins & Smart Alignment\n` +
+            `• Improves rendering performance for architectural objects\n` +
+            `• Standardizes data formats for Vastu & Orientation\n\n` +
+            `Only select OK if you accept these structural changes.`;
+
+        if (!confirm(message)) {
+            console.warn("[MIGRATION] User declined migration. Loading in legacy mode.");
+            return parsed;
+        }
+
+        // START MIGRATION
+        console.warn(`[MIGRATION] UPGRADING PROJECT from v${fileVersion} to v${CURRENT_VERSION}`);
+
+        // 1. Move flat scene to designs catalog if needed
+        if (parsed.scene && !parsed.designs) {
+            parsed.designs = [{
+                id: 0,
+                name: parsed.projectName || 'Migrated Design',
+                scene: parsed.scene
+            }];
+            delete parsed.scene;
+        }
+
+        // 2. Default modern settings
+        const s = parsed.settings || {};
+        if (s.stickyWalls === undefined) s.stickyWalls = true;
+        if (s.showGrid === undefined) s.showGrid = true;
+        if (s.theme === undefined) s.theme = 'dark';
+        parsed.settings = s;
+
+        // 3. Update version string
+        parsed.version = CURRENT_VERSION;
+        console.log("[MIGRATION] Migration complete.");
+        return parsed;
+    }
+
+    // ---- Load: restores all designs, settings, and project name ----
+    function loadProjectFromJSON(parsedInput) {
+        try {
+            console.log("Starting project load sequence...");
+            const parsed = migrateProjectIfNeeded(parsedInput);
+
+            if (parsed && parsed.designs && Array.isArray(parsed.designs)) {
+                // Modern unified structure
+                if (parsed.projectName && projectNameInput) {
+                    projectNameInput.value = parsed.projectName;
+                }
+
+                try {
+                    applySettings(parsed.settings || null);
+                } catch (settErr) {
+                    console.warn("Settings application partially failed:", settErr);
+                }
+
+                tabs.clear();
+                tabCounter = 0;
+                for (const design of parsed.designs) {
+                    const tid = tabCounter++;
+                    tabs.set(tid, {
+                        name: design.name || `Design ${tid + 1}`,
+                        scene: design.scene || []
+                    });
+                }
+
+                const targetIdx = parsed.activeDesignIndex || 0;
+                const keys = [...tabs.keys()];
+                if (keys.length === 0) throw new Error("No design tabs found in project.");
+
+                activeTabId = keys[Math.min(targetIdx, keys.length - 1)] || keys[0];
+
+                const activeData = tabs.get(activeTabId);
+                if (!activeData) throw new Error("Could not retrieve active design data.");
+
+                engine.scene = JSON.parse(JSON.stringify(activeData.scene));
+                engine.clearSelection();
+                engine.undoStack = [];
+
+                try {
+                    engine.render();
+                    renderTabBar();
+                } catch (renderErr) {
+                    console.error("Initial render failed:", renderErr);
+                }
+            } else {
+                throw new Error("Missing design catalog or invalid project root.");
+            }
+
+            if (typeof engine.zoomToFit === 'function') engine.zoomToFit();
+            updateJsonEditor();
+            console.log("Project loaded successfully.");
+        } catch (loadErr) {
+            console.error("Critical error in loadProjectFromJSON:", loadErr);
+            alert(`Load Failed: ${loadErr.message || 'Invalid File Format'}`);
+        }
     }
 
     document.getElementById('load-json-input').addEventListener('change', (e) => {
@@ -547,9 +664,14 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = async (event) => {
             try {
                 let rawContent = event.target.result;
+                if (!rawContent) throw new Error("File is empty.");
+
+                // Sanitize: remove BOM and trim
+                rawContent = rawContent.replace(/^\uFEFF/, "").trim();
 
                 // Auto-detect encrypted files
                 if (typeof RoomioCrypto !== 'undefined' && RoomioCrypto.isEncrypted(rawContent)) {
+                    console.log("Encrypted project detected. Initiatives decryption strategy...");
                     const strategy = RoomioCrypto.detectStrategy(rawContent);
                     let passphrase = null;
 
@@ -560,19 +682,25 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
                     }
-
                     rawContent = await RoomioCrypto.decrypt(rawContent, passphrase);
                 }
 
-                const parsed = JSON.parse(rawContent);
+                let parsed;
+                try {
+                    parsed = JSON.parse(rawContent);
+                } catch (parseErr) {
+                    console.error("JSON Parse Error:", parseErr);
+                    throw new Error(`Invalid JSON syntax: ${parseErr.message}`);
+                }
+
                 loadProjectFromJSON(parsed);
                 e.target.value = '';
             } catch (err) {
-                console.error(err);
+                console.error("FileReader Error:", err);
                 if (err.message && err.message.includes('passphrase')) {
                     alert('Decryption failed. Wrong passphrase or corrupted file.');
                 } else {
-                    alert('Error loading project file.');
+                    alert(`Load Error: ${err.message}`);
                 }
                 e.target.value = '';
             }
@@ -600,6 +728,113 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================== VASTU / NORTH / BG / STRUCTURE ====================
+    // ---- Windows Style Menu Bindings ----
+    const menuThemeToggle = document.getElementById('menu-theme-toggle');
+    if (menuThemeToggle) {
+        menuThemeToggle.addEventListener('click', () => {
+            const isLight = document.body.classList.contains('theme-light');
+            const newTheme = isLight ? 'theme-dark' : 'theme-light';
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(newTheme);
+
+            const themeStatus = document.getElementById('theme-status');
+            if (themeStatus) themeStatus.innerText = isLight ? 'Dark' : 'Light';
+
+            // Auto-update canvas background if user hasn't explicitly changed it to something else
+            const currentBG = document.getElementById('bg-color').value;
+            if (currentBG === '#1e1e22' || currentBG === '#ffffff') {
+                const nextBG = isLight ? '#1e1e22' : '#ffffff';
+                document.getElementById('bg-color').value = nextBG;
+                engine.bgColor = nextBG;
+            }
+
+            engine.render();
+        });
+    }
+
+    const menuToggleGrid = document.getElementById('menu-toggle-grid');
+    if (menuToggleGrid) {
+        menuToggleGrid.addEventListener('click', () => {
+            engine.showGrid = !engine.showGrid;
+            engine.render();
+        });
+    }
+
+    const menuToggleVastu = document.getElementById('menu-toggle-vastu');
+    if (menuToggleVastu) {
+        menuToggleVastu.addEventListener('click', () => {
+            engine.showVastu = !engine.showVastu;
+            engine.render();
+        });
+    }
+
+    const menuToggleGuide = document.getElementById('menu-toggle-guide');
+    if (menuToggleGuide) {
+        menuToggleGuide.addEventListener('click', () => {
+            engine.showCrosshairs = !engine.showCrosshairs;
+            engine.render();
+        });
+    }
+
+    const menuToggleSticky = document.getElementById('menu-toggle-sticky');
+    if (menuToggleSticky) {
+        menuToggleSticky.addEventListener('click', () => {
+            engine.stickyWalls = !engine.stickyWalls;
+        });
+    }
+
+    const menuZoomReset = document.getElementById('menu-zoom-reset');
+    if (menuZoomReset) {
+        menuZoomReset.addEventListener('click', () => {
+            if (typeof engine.zoomToFit === 'function') engine.zoomToFit();
+        });
+    }
+
+    const menuToggleJson = document.getElementById('menu-toggle-json');
+    if (menuToggleJson) {
+        menuToggleJson.addEventListener('click', () => {
+            document.getElementById('toggle-json-sidebar')?.click();
+        });
+    }
+
+    const menuToggleProps = document.getElementById('menu-toggle-props');
+    if (menuToggleProps) {
+        menuToggleProps.addEventListener('click', () => {
+            document.getElementById('toggle-properties-sidebar')?.click();
+        });
+    }
+
+    // Modal Logic
+    const backdrop = document.getElementById('modal-backdrop');
+    const modals = {
+        shortcuts: document.getElementById('modal-shortcuts'),
+        about: document.getElementById('modal-about'),
+        guide: document.getElementById('modal-guide')
+    };
+
+    function openModal(id) {
+        backdrop.classList.remove('hidden');
+        Object.values(modals).forEach(m => m.classList.add('hidden'));
+        modals[id]?.classList.remove('hidden');
+        lucide.createIcons(); // refresh icons in content
+    }
+
+    function closeModal() {
+        backdrop.classList.add('hidden');
+    }
+
+    document.getElementById('menu-help-shortcuts')?.addEventListener('click', () => openModal('shortcuts'));
+    document.getElementById('menu-help-about')?.addEventListener('click', () => openModal('about'));
+    document.getElementById('menu-help-guide')?.addEventListener('click', () => openModal('guide'));
+
+    document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeModal));
+    backdrop?.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !backdrop.classList.contains('hidden')) closeModal();
+        if (e.key === 'F1') { e.preventDefault(); openModal('shortcuts'); }
+    });
+
     const toggleVastuBtn = document.getElementById('toggle-vastu');
     if (toggleVastuBtn) {
         toggleVastuBtn.addEventListener('click', () => {
@@ -630,6 +865,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const toggleCrosshairsBtn = document.getElementById('toggle-crosshairs');
+    if (toggleCrosshairsBtn) {
+        toggleCrosshairsBtn.addEventListener('click', () => {
+            engine.showCrosshairs = !engine.showCrosshairs;
+            if (engine.showCrosshairs) {
+                toggleCrosshairsBtn.style.background = '#a855f7';
+                toggleCrosshairsBtn.style.color = 'white';
+            } else {
+                toggleCrosshairsBtn.style.background = 'rgba(168, 85, 247, 0.1)';
+                toggleCrosshairsBtn.style.color = '#a855f7';
+            }
+            engine.render();
+        });
+    }
+
+    const toggleStickyBtn = document.getElementById('toggle-sticky');
+    if (toggleStickyBtn) {
+        toggleStickyBtn.addEventListener('click', () => {
+            engine.stickyWalls = !engine.stickyWalls;
+            if (engine.stickyWalls) {
+                toggleStickyBtn.style.background = '#84cc16';
+                toggleStickyBtn.style.color = 'white';
+            } else {
+                toggleStickyBtn.style.background = 'rgba(132, 204, 22, 0.1)';
+                toggleStickyBtn.style.color = '#84cc16';
+            }
+            engine.render();
+        });
+    }
+
     const toggleStructureBtn = document.getElementById('toggle-structure');
     if (toggleStructureBtn) {
         toggleStructureBtn.addEventListener('click', () => {
@@ -645,15 +910,106 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ==================== NORTH ANGLE & COMPASS ====================
     const northAngleInput = document.getElementById('north-angle');
+    const compassWidget = document.getElementById('compass-widget');
+    const compassNeedle = document.getElementById('compass-needle');
+    const compassLabels = document.getElementById('compass-labels');
+    const compassBubble = document.getElementById('compass-angle-bubble');
+
+    // Initialize widget position
+    if (compassWidget) {
+        compassWidget.style.top = '100px';
+        compassWidget.style.right = '40px';
+    }
+
+    function updateCompassUI(angle) {
+        if (compassLabels) {
+            // Stationary needle points left (-90), so labels must rotate to meet it
+            // When angle is 0 (North), 'N' should be at the needle position (left)
+            compassLabels.style.transform = `rotate(${angle}deg)`;
+        }
+        if (compassBubble) {
+            compassBubble.innerText = `${angle}°`;
+        }
+        if (northAngleInput) {
+            northAngleInput.value = angle;
+            const valLabel = document.getElementById('north-angle-val');
+            if (valLabel) valLabel.innerText = `${angle}°`;
+        }
+    }
+
     if (northAngleInput) {
         northAngleInput.addEventListener('input', (e) => {
             const val = parseInt(e.target.value, 10);
             engine.northAngle = val;
-            document.getElementById('north-angle-val').innerText = `${val}°`;
-            const ring = document.querySelector('.compass-ring');
-            if (ring) ring.style.transform = `rotate(${val}deg)`;
-            if (engine.showVastu) engine.render();
+            updateCompassUI(val);
+            engine.render();
+        });
+    }
+
+    // Interactive Compass: Move & Rotate
+    if (compassWidget) {
+        let isDraggingCompass = false;
+        let isMovingCompass = false;
+        let startX, startY, startRight, startTop;
+
+        const handleInteraction = (e) => {
+            if (isMovingCompass) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                compassWidget.style.right = (startRight - dx) + 'px';
+                compassWidget.style.top = (startTop + dy) + 'px';
+                return;
+            }
+
+            if (isDraggingCompass) {
+                const rect = compassWidget.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const angleRad = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                let angleDeg = Math.round(angleRad * (180 / Math.PI) + 90);
+
+                if (angleDeg < 0) angleDeg += 360;
+                angleDeg = angleDeg % 360;
+
+                engine.northAngle = angleDeg;
+                updateCompassUI(angleDeg);
+                if (engine.showVastu) engine.render();
+            }
+        };
+
+        compassWidget.addEventListener('mousedown', (e) => {
+            const rect = compassWidget.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // If click is near center (within 35px), rotate. Otherwise, move.
+            const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+
+            if (dist < 35) {
+                isDraggingCompass = true;
+            } else {
+                isMovingCompass = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const style = window.getComputedStyle(compassWidget);
+                startRight = parseInt(style.right, 10);
+                startTop = parseInt(style.top, 10);
+                compassWidget.style.cursor = 'move';
+            }
+
+            document.addEventListener('mousemove', handleInteraction);
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDraggingCompass || isMovingCompass) {
+                isDraggingCompass = false;
+                isMovingCompass = false;
+                compassWidget.style.cursor = 'crosshair';
+                document.removeEventListener('mousemove', handleInteraction);
+            }
         });
     }
 

@@ -13,6 +13,8 @@ class CanvasEngine {
         this.scale = 1;
         this.showVastu = false;
         this.showGrid = true;
+        this.showCrosshairs = false;
+        this.stickyWalls = true;
         this.hideStructure = false;
         this.northAngle = 0;
         this.isLoading = false;
@@ -380,8 +382,24 @@ class CanvasEngine {
     }
     distToSegment(p, v, w) { return Math.sqrt(this.distToSegmentSquared(p, v, w)); }
 
+    buildJointCache() {
+        this.jointCache = new Map();
+        const eps = 0.1;
+        const getK = (x, y) => `${Math.round(x/eps)*eps},${Math.round(y/eps)*eps}`;
+        for (const s of this.scene) {
+            if (s.type !== 'wall' && s.type !== 'measure') continue;
+            const k1 = getK(s.startX, s.startY);
+            const k2 = getK(s.endX, s.endY);
+            if (!this.jointCache.has(k1)) this.jointCache.set(k1, []);
+            if (!this.jointCache.has(k2)) this.jointCache.set(k2, []);
+            this.jointCache.get(k1).push(s.id);
+            this.jointCache.get(k2).push(s.id);
+        }
+    }
+
     render(drawBackgroundAndGrid = true) {
         if (!this.ctx) return;
+        this.buildJointCache();
         
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -452,6 +470,33 @@ class CanvasEngine {
             }
         }
         
+        // 4. Draw Cursor Crosshairs if enabled
+        if (drawBackgroundAndGrid && this.showCrosshairs && !this.isPanning) {
+            this.ctx.save();
+            this.ctx.strokeStyle = this.isLightBg ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)';
+            this.ctx.lineWidth = 1 / this.scale;
+            this.ctx.setLineDash([5 / this.scale, 5 / this.scale]);
+            
+            const startX = -this.offsetX / this.scale;
+            const endX = startX + this.canvas.width / this.scale;
+            const startY = -this.offsetY / this.scale;
+            const endY = startY + this.canvas.height / this.scale;
+            
+            // Vertical line
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.mouseX, startY);
+            this.ctx.lineTo(this.mouseX, endY);
+            this.ctx.stroke();
+            
+            // Horizontal line
+            this.ctx.beginPath();
+            this.ctx.moveTo(startX, this.mouseY);
+            this.ctx.lineTo(endX, this.mouseY);
+            this.ctx.stroke();
+            
+            this.ctx.restore();
+        }
+        
         if (this.activeOverlayCallback) {
             this.activeOverlayCallback(this.ctx);
         }
@@ -465,132 +510,103 @@ class CanvasEngine {
         this.ctx.restore();
     }
 
-    drawShape(shape, isInteractive) {
-        if (this.hideStructure && (shape.type === 'wall' || shape.type === 'room')) {
-            if (!isInteractive) return; // Completely hide on export
-        }
-
-        const isSelected = this.selectedItems.includes(shape);
-        
-        if (shape.type === 'object') {
-            this.drawObject(shape, isInteractive, isSelected);
-            return;
-        }
-
-        if (shape.type === 'area_measure') {
-            this.drawAreaMeasure(shape, isInteractive, isSelected);
-            return;
-        }
-
+    isJoint(x, y, id) {
+        if (!this.jointCache) return false;
+        const eps = 0.1;
+        const k = `${Math.round(x/eps)*eps},${Math.round(y/eps)*eps}`;
+        const IDs = this.jointCache.get(k);
+        if (!IDs) return false;
+        return IDs.some(otherId => otherId !== id);
+    }    drawWallOrMeasure(shape, isInteractive, isSelected) {
+        const isMeasure = shape.type === 'measure';
         this.ctx.save();
         
-        if (this.hideStructure && (shape.type === 'wall' || shape.type === 'room')) {
-            this.ctx.globalAlpha = 0.2; // Opaque/ghosted in editor
-        }
-
-        if (shape.type === 'room') {
-            this.ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.2)' : this.compFill;
-            this.ctx.strokeStyle = isSelected ? '#6366f1' : this.compColor;
-            this.ctx.lineWidth = 2;
-            this.ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
-            this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
-            
-            this.ctx.fillStyle = isInteractive ? (isSelected ? '#6366f1' : this.baseText) : this.baseText;
-            const fontSize = 12 / this.scale;
-            this.ctx.font = `${fontSize}px Inter, sans-serif`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            const wFt = this.pixelsToFeet(shape.width);
-            const hFt = this.pixelsToFeet(shape.height);
-            this.ctx.fillText(`${wFt} × ${hFt}`, shape.x + shape.width / 2, shape.y + shape.height / 2);
-        } else if (shape.type === 'wall' || shape.type === 'measure') {
-            const isMeasure = shape.type === 'measure';
-            if (isInteractive) {
-                 this.ctx.strokeStyle = isSelected ? '#6366f1' : (isMeasure ? this.wallColor : this.wallColor);
-            } else {
-                 this.ctx.strokeStyle = isMeasure ? this.wallColor : this.exportWallColor; 
-            }
-            this.ctx.lineWidth = isMeasure ? 2 : (shape.thickness || 6);
-            if (isMeasure) {
-                this.ctx.setLineDash([8 / this.scale, 6 / this.scale]);
-            } else if (shape.lineType === 'dotted') {
-                this.ctx.setLineDash([15 / this.scale, 10 / this.scale]);
-            }
-            this.ctx.lineCap = 'butt';
-            this.ctx.beginPath();
-            this.ctx.moveTo(shape.startX, shape.startY);
-            this.ctx.lineTo(shape.endX, shape.endY);
-            this.ctx.stroke();
-            if (isMeasure || shape.lineType === 'dotted') this.ctx.setLineDash([]);
-            
-            // Draw endpoints
-            this.ctx.fillStyle = isInteractive ? (this.isLightBg ? '#000000' : '#ffffff') : this.exportWallColor;
-            this.ctx.beginPath();
-            if (isMeasure) {
-                this.ctx.save();
-                this.ctx.translate(shape.startX, shape.startY);
-                this.ctx.rotate(Math.atan2(shape.endY - shape.startY, shape.endX - shape.startX));
-                this.ctx.moveTo(0, -8 / this.scale);
-                this.ctx.lineTo(0, 8 / this.scale);
-                this.ctx.stroke();
-                this.ctx.restore();
-                
-                this.ctx.save();
-                this.ctx.translate(shape.endX, shape.endY);
-                this.ctx.rotate(Math.atan2(shape.endY - shape.startY, shape.endX - shape.startX));
-                this.ctx.moveTo(0, -8 / this.scale);
-                this.ctx.lineTo(0, 8 / this.scale);
-                this.ctx.stroke();
-                this.ctx.restore();
-                this.ctx.restore();
-            } else {
-                const r = 4 / this.scale;
-                this.ctx.fillRect(shape.startX - r, shape.startY - r, r*2, r*2);
-                this.ctx.fillRect(shape.endX - r, shape.endY - r, r*2, r*2);
-            }
-            
-            // Draw text
-            this.ctx.save();
-            const dx = shape.endX - shape.startX;
-            const dy = shape.endY - shape.startY;
-            let absAngle = Math.round(Math.atan2(dy, dx) * 180 / Math.PI);
-            if (absAngle < 0) absAngle += 360;
-            
-            const len = Math.sqrt(dx*dx + dy*dy);
-            const midX = shape.startX + dx/2;
-            const midY = shape.startY + dy/2;
-            
-            this.ctx.translate(midX, midY);
-            // Rotate text to align with line
-            let textAngle = Math.atan2(dy, dx);
-            if (textAngle > Math.PI/2 || textAngle < -Math.PI/2) textAngle += Math.PI;
-            this.ctx.rotate(textAngle);
-            
-            this.ctx.fillStyle = isInteractive ? (isSelected ? '#6366f1' : this.baseText) : this.baseText;
-            const fontSize = 12 / this.scale;
-            this.ctx.font = `${fontSize}px Inter, sans-serif`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'bottom';
-            const lenFt = this.pixelsToFeet(len);
-            if (isMeasure) {
-                this.ctx.fillText(`${lenFt}`, 0, -6 / this.scale);
-            } else {
-                this.ctx.fillText(`${lenFt} (${absAngle}°)`, 0, -6 / this.scale);
-            }
-            this.ctx.restore();
+        if (isInteractive) {
+             this.ctx.strokeStyle = isSelected ? '#6366f1' : this.wallColor;
+        } else {
+             this.ctx.strokeStyle = isMeasure ? this.wallColor : this.exportWallColor; 
         }
         
-        // Selection bounding box details
-        if (isSelected && shape.type === 'room') {
-            this.ctx.fillStyle = '#6366f1';
-            // Corners for pseudo-resize visual
+        this.ctx.lineWidth = isMeasure ? 2 : (shape.thickness || 6);
+        if (isMeasure) this.ctx.setLineDash([8 / this.scale, 6 / this.scale]);
+        else if (shape.lineType === 'dotted') this.ctx.setLineDash([15 / this.scale, 10 / this.scale]);
+        
+        this.ctx.lineCap = 'square';
+        this.ctx.lineJoin = 'miter';
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(shape.startX, shape.startY);
+        this.ctx.lineTo(shape.endX, shape.endY);
+        this.ctx.stroke();
+        
+        if (isMeasure || shape.lineType === 'dotted') this.ctx.setLineDash([]);
+        
+        // Handles/Joints
+        if (isInteractive) {
             const r = 4 / this.scale;
+            const isStartJoint = this.isJoint(shape.startX, shape.startY, shape.id);
+            const isEndJoint = this.isJoint(shape.endX, shape.endY, shape.id);
+            const standardColor = this.isLightBg ? '#000000' : '#ffffff';
+            const jointColor = '#22c55e';
+
+            this.ctx.fillStyle = isStartJoint ? jointColor : standardColor;
+            this.ctx.fillRect(shape.startX - r, shape.startY - r, r*2, r*2);
+            this.ctx.fillStyle = isEndJoint ? jointColor : standardColor;
+            this.ctx.fillRect(shape.endX - r, shape.endY - r, r*2, r*2);
+        }
+
+        // Text
+        const dx = shape.endX - shape.startX;
+        const dy = shape.endY - shape.startY;
+        const len = Math.sqrt(dx*dx + dy*dy);
+        const midX = shape.startX + dx/2;
+        const midY = shape.startY + dy/2;
+        
+        this.ctx.save();
+        this.ctx.translate(midX, midY);
+        let textAngle = Math.atan2(dy, dx);
+        if (textAngle > Math.PI/2 || textAngle < -Math.PI/2) textAngle += Math.PI;
+        this.ctx.rotate(textAngle);
+        
+        this.ctx.fillStyle = isInteractive ? (isSelected ? '#6366f1' : this.baseText) : this.baseText;
+        const fontSize = 12 / this.scale;
+        this.ctx.font = `${fontSize}px Inter, sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'bottom';
+        const lenFt = this.pixelsToFeet(len);
+        this.ctx.fillText(lenFt, 0, -6 / this.scale);
+        this.ctx.restore();
+        
+        this.ctx.restore();
+    }
+
+    drawRoom(shape, isInteractive, isSelected) {
+        this.ctx.save();
+        this.ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.2)' : this.compFill;
+        this.ctx.strokeStyle = isSelected ? '#6366f1' : this.compColor;
+        this.ctx.lineWidth = 2;
+        
+        this.ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
+        this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+        
+        // Text
+        this.ctx.fillStyle = isInteractive ? (isSelected ? '#6366f1' : this.baseText) : this.baseText;
+        const fontSize = 12 / this.scale;
+        this.ctx.font = `600 ${fontSize}px Inter, sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        const wFt = this.pixelsToFeet(shape.width);
+        const hFt = this.pixelsToFeet(shape.height);
+        this.ctx.fillText(`${wFt} \u00d7 ${hFt}`, shape.x + shape.width / 2, shape.y + shape.height / 2);
+        
+        if (isSelected) {
+            const r = 4 / this.scale;
+            this.ctx.fillStyle = '#6366f1';
             this.ctx.fillRect(shape.x - r, shape.y - r, r*2, r*2);
             this.ctx.fillRect(shape.x + shape.width - r, shape.y - r, r*2, r*2);
             this.ctx.fillRect(shape.x - r, shape.y + shape.height - r, r*2, r*2);
             this.ctx.fillRect(shape.x + shape.width - r, shape.y + shape.height - r, r*2, r*2);
         }
-        
         this.ctx.restore();
     }
 
@@ -598,59 +614,69 @@ class CanvasEngine {
         this.ctx.save();
         const cx = shape.x + shape.width / 2;
         const cy = shape.y + shape.height / 2;
-        
         this.ctx.translate(cx, cy);
+        
         const rot = shape.rotation || 0;
         this.ctx.rotate(rot * Math.PI / 180);
-        
+        this.ctx.scale(shape.flipX ? -1 : 1, shape.flipY ? -1 : 1);
+
         const localW = (rot % 180 !== 0) ? shape.height : shape.width;
         const localH = (rot % 180 !== 0) ? shape.width : shape.height;
         const hw = localW / 2;
         const hh = localH / 2;
-        
-        this.ctx.scale(shape.flipX ? -1 : 1, shape.flipY ? -1 : 1);
-        
+
         this.ctx.strokeStyle = isInteractive ? (isSelected ? '#6366f1' : this.compColor) : this.exportWallColor;
         this.ctx.lineWidth = 2 / this.scale;
         this.ctx.fillStyle = isInteractive ? (isSelected ? 'rgba(99, 102, 241, 0.1)' : this.compFill) : (this.isLightBg ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.4)");
-        
-        this.ctx.beginPath();
 
-        // ---- Registry-based drawing ----
+        // Registry-based drawing
         const elementDef = (typeof ElementRegistry !== 'undefined') ? ElementRegistry.get(shape.subType) : null;
         if (elementDef && elementDef.draw) {
-            const colors = {
-                textColor: isInteractive ? (isSelected ? '#6366f1' : this.compColor) : this.exportWallColor
-            };
+            const colors = { textColor: isInteractive ? (isSelected ? '#6366f1' : this.compColor) : this.exportWallColor };
             elementDef.draw(this.ctx, hw, hh, localW, localH, this.scale, shape, colors);
         } else {
-            // Fallback for unknown elements
             this.ctx.fillRect(-hw, -hh, localW, localH);
             this.ctx.strokeRect(-hw, -hh, localW, localH);
         }
-        
-        this.ctx.restore();
-        
-        // Selection handles
+
         if (isSelected) {
-            this.ctx.fillStyle = '#6366f1';
+            // Drop back to global coordinates for handles to prevent rotation skewing
+            this.ctx.restore();
+            this.ctx.save();
+            this.ctx.translate(this.offsetX, this.offsetY);
+            this.ctx.scale(this.scale, this.scale);
+            
             const r = 4 / this.scale;
+            this.ctx.fillStyle = '#6366f1';
             this.ctx.fillRect(shape.x - r, shape.y - r, r*2, r*2);
             this.ctx.fillRect(shape.x + shape.width - r, shape.y - r, r*2, r*2);
             this.ctx.fillRect(shape.x - r, shape.y + shape.height - r, r*2, r*2);
             this.ctx.fillRect(shape.x + shape.width - r, shape.y + shape.height - r, r*2, r*2);
         }
+        this.ctx.restore();
+    }
+
+    drawShape(shape, isInteractive) {
+        if (this.hideStructure && (shape.type === 'wall' || shape.type === 'room')) {
+            if (!isInteractive) return;
+        }
+
+        const isSelected = this.selectedItems.includes(shape);
         
-        // Dimension label (skip for text elements)
-        if (shape.subType !== 'text') {
-            this.ctx.fillStyle = isInteractive ? (isSelected ? '#6366f1' : '#94a3b8') : '#334155';
-            const fontSize = 12 / this.scale;
-            this.ctx.font = `${fontSize}px Inter, sans-serif`;
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            const wFt = this.pixelsToFeet(shape.width);
-            const hFt = this.pixelsToFeet(shape.height);
-            this.ctx.fillText(`${wFt} × ${hFt}`, shape.x + shape.width / 2, shape.y + shape.height / 2);
+        switch(shape.type) {
+            case 'wall':
+            case 'measure':
+                this.drawWallOrMeasure(shape, isInteractive, isSelected);
+                break;
+            case 'room':
+                this.drawRoom(shape, isInteractive, isSelected);
+                break;
+            case 'object':
+                this.drawObject(shape, isInteractive, isSelected);
+                break;
+            case 'area_measure':
+                this.drawAreaMeasure(shape, isInteractive, isSelected);
+                break;
         }
     }
 
@@ -916,5 +942,87 @@ class CanvasEngine {
         }
         
         this.ctx.restore();
+    }
+
+    drawCompass(x, y, angle) {
+        this.ctx.save();
+        this.ctx.translate(x, y);
+        
+        // Background Circle
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 45, 0, Math.PI * 2);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fill();
+        this.ctx.strokeStyle = '#6366f1';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.stroke();
+
+        // Labels
+        this.ctx.fillStyle = '#475569';
+        this.ctx.font = 'bold 12px Inter, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Rotating Circle for Labels
+        this.ctx.save();
+        this.ctx.rotate(angle * Math.PI / 180);
+        
+        this.ctx.fillStyle = '#6366f1';
+        this.ctx.fillText('N', 0, -32);
+        this.ctx.fillStyle = '#94a3b8';
+        this.ctx.fillText('E', 32, 0);
+        this.ctx.fillText('S', 0, 32);
+        this.ctx.fillText('W', -32, 0);
+        this.ctx.restore();
+
+        // Constant Needle (Facing Left: -90deg relative to Canvas TOP)
+        this.ctx.save();
+        this.ctx.rotate(-Math.PI / 2);
+        
+        // North Needle (Primary - now 30% smaller: height ~25 instead of 35)
+        this.ctx.beginPath();
+        this.ctx.moveTo(-2, 0);
+        this.ctx.lineTo(0, -25);
+        this.ctx.lineTo(2, 0);
+        this.ctx.fillStyle = '#6366f1';
+        this.ctx.fill();
+        
+        // South Needle
+        this.ctx.beginPath();
+        this.ctx.moveTo(-2, 0);
+        this.ctx.lineTo(0, 25);
+        this.ctx.lineTo(2, 0);
+        this.ctx.fillStyle = '#475569';
+        this.ctx.fill();
+        
+        this.ctx.restore();
+        
+        this.ctx.restore();
+    }
+
+    exportToDataURL() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = this.canvas.width;
+        tempCanvas.height = this.canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        const originalCtx = this.ctx;
+        const originalCanvas = this.canvas;
+        
+        // Trigger a high-quality render on a temporary context if needed
+        // For now, we just ensure the compass is drawn on the actual canvas before capture
+        const compassWidget = document.getElementById('compass-widget');
+        if (compassWidget) {
+            const rect = compassWidget.getBoundingClientRect();
+            const canvasRect = this.canvas.getBoundingClientRect();
+            // Calculate position relative to canvas
+            const x = (rect.left - canvasRect.left) + rect.width/2;
+            const y = (rect.top - canvasRect.top) + rect.height/2;
+            this.drawCompass(x, y, this.northAngle);
+        }
+        
+        const data = this.canvas.toDataURL('image/png');
+        this.render(); // Redraw once more to clean any "merged" widgets for screen view
+        return data;
     }
 }

@@ -16,6 +16,8 @@ Desktop.ini
 
 # Backups
 v1.0/
+v2.0/
 
 # Misc
+outputs/
 *.log
