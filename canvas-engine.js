@@ -150,7 +150,14 @@ class CanvasEngine {
         this.scale = newScale;
         this.render();
         const zoomLabel = document.getElementById('zoom-val');
-        if (zoomLabel) zoomLabel.innerText = Math.round(this.scale * 100) + '%';
+        if (zoomLabel) {
+            const display = Math.round(this.scale * 100) + '%';
+            if (zoomLabel.tagName === 'INPUT') {
+                zoomLabel.value = display;
+            } else {
+                zoomLabel.innerText = display;
+            }
+        }
     }
 
     setZoom(level) {
@@ -782,9 +789,47 @@ class CanvasEngine {
                 minY = Math.min(minY, item.startY, item.endY);
                 maxX = Math.max(maxX, item.startX, item.endX);
                 maxY = Math.max(maxY, item.startY, item.endY);
+            } else if (item.type === 'area_measure') {
+                for (const p of item.points) {
+                    minX = Math.min(minX, p.x);
+                    minY = Math.min(minY, p.y);
+                    maxX = Math.max(maxX, p.x);
+                    maxY = Math.max(maxY, p.y);
+                }
             }
         }
         return hasGeometry ? { minX, minY, maxX, maxY, w: maxX - minX, h: maxY - minY } : null;
+    }
+
+    zoomToFit() {
+        const bounds = this.getSceneBounds();
+        if (!bounds) {
+            this.setZoom(1);
+            this.offsetX = 0;
+            this.offsetY = 0;
+            this.render();
+            return;
+        }
+
+        const padding = 50; 
+        const availableW = this.canvas.width - padding * 2;
+        const availableH = this.canvas.height - padding * 2;
+
+        let scale = Math.min(availableW / bounds.w, availableH / bounds.h);
+        // Clamp scale to sensible limits (e.g., 0.2 to 2.0 when fitting)
+        scale = Math.max(0.1, Math.min(scale, 2.0));
+
+        this.scale = scale;
+        this.offsetX = (this.canvas.width / 2) - ((bounds.minX + bounds.maxX) / 2) * scale;
+        this.offsetY = (this.canvas.height / 2) - ((bounds.minY + bounds.maxY) / 2) * scale;
+        
+        this.render();
+        const zoomInput = document.getElementById('zoom-val');
+        if (zoomInput) {
+            const display = Math.round(this.scale * 100) + '%';
+            if (zoomInput.tagName === 'INPUT') zoomInput.value = display;
+            else zoomInput.innerText = display;
+        }
     }
 
     drawVastuGrid() {

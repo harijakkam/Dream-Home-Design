@@ -337,12 +337,24 @@ document.addEventListener('DOMContentLoaded', () => {
         engine.setZoom(engine.scale * 0.8);
     });
     document.getElementById('zoom-reset').addEventListener('click', () => {
-        engine.setZoom(1);
-        engine.offsetX = 0;
-        engine.offsetY = 0;
-        engine.render();
-        document.getElementById('zoom-val').innerText = '100%';
+        engine.zoomToFit();
     });
+
+    const zoomValInput = document.getElementById('zoom-val');
+    if (zoomValInput) {
+        zoomValInput.addEventListener('change', (e) => {
+            const raw = e.target.value.replace(/%/g, '');
+            let level = parseFloat(raw) / 100;
+            if (isNaN(level)) {
+                e.target.value = Math.round(engine.scale * 100) + '%';
+                return;
+            }
+            level = Math.max(0.1, Math.min(level, 5));
+            engine.setZoom(level);
+        });
+        // Prevent pan being triggered if user clicks the input
+        zoomValInput.addEventListener('mousedown', (e) => e.stopPropagation());
+    }
 
     // ==================== PROJECT IO ====================
     function getProjectName() {
@@ -421,8 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---- Save: saves ALL designs in a single project file ----
-    const encryptToggle = document.getElementById('encrypt-toggle');
-
     document.getElementById('save-json-btn').addEventListener('click', async () => {
         try {
             saveCurrentTab();
@@ -450,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 designs: designs
             };
             const jsonStr = JSON.stringify(project, null, 2);
-            const shouldEncrypt = encryptToggle && encryptToggle.checked;
+            const shouldEncrypt = true; // Encryption is now enforced for all project saves.
 
             let fileContent, fileExt;
             if (shouldEncrypt && typeof RoomioCrypto !== 'undefined') {
@@ -526,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Invalid project file format.');
             return;
         }
+        engine.zoomToFit();
         updateJsonEditor();
     }
 
