@@ -10,9 +10,16 @@ export default async function Page() {
   const { data: todos } = await supabase.from('todos').select();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Map to AppUser interface for RoomioDesigner
+  const initialUser = user ? {
+     id: user.id,
+     email: user.email,
+     role: (user.user_metadata?.role as 'admin'|'user') || 'user'
+  } : null;
+
   return (
     <main className="app-container">
-      <RoomioDesigner initialUser={user} />
+      <RoomioDesigner initialUser={initialUser} />
       
       {/* Sample Todos display from original request */}
       {todos && todos.length > 0 && (
