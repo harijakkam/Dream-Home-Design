@@ -1,7 +1,12 @@
-# Netlify Configuration
 [build]
   publish = "."
   command = "echo 'Static site, no build needed'"
+  functions = "api"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
 [[redirects]]
   from = "/*"

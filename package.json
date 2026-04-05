@@ -1,16 +1,29 @@
 {
   "name": "roomio",
-  "version": "2.0.0",
-  "description": "Professional zero-install 2D architectural floor plan designer with Vastu grid support",
-  "main": "index.html",
+  "version": "2.1.0",
+  "private": true,
   "scripts": {
-    "start": "npx -y live-server --port=3000 --open=index.html",
-    "dev": "npx -y live-server --port=3000 --open=index.html",
-    "preview": "npx -y http-server -p 3000 -o",
-    "lint": "echo 'No linter configured'"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "keywords": ["floor-plan", "architectural-design", "2d-designer", "vastu", "canvas"],
-  "author": "",
-  "license": "MIT",
-  "private": true
+  "dependencies": {
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "lucide-react": "^0.378.0",
+    "@supabase/supabase-js": "^2.43.1",
+    "@supabase/ssr": "^0.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3"
+  }
 }

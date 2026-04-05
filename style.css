@@ -946,3 +946,39 @@ kbd {
     height: calc(100% - 38px) !important;
 }
 
+
+/* Authentication System Polishes */
+@keyframes modal-appear {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+#modal-auth {
+    animation: modal-appear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(30, 30, 34, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#modal-auth .action-btn:active {
+    transform: scale(0.98);
+}
+
+.spinner {
+    border-right-color: transparent !important;
+}
+
+#modal-auth input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-light #modal-auth {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-light #modal-auth input {
+    background: rgba(0, 0, 0, 0.03);
+    color: #000;
+}
