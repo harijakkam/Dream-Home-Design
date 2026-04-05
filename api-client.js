@@ -4,56 +4,73 @@
  */
 
 const ApiClient = {
-    // Current mock storage for demonstration
-    _store: {},
-
-    init() {
-        const savedProjects = localStorage.getItem('roomio_projects');
-        if (savedProjects) {
-            this._store = JSON.parse(savedProjects);
-            console.log("[API] Mock database initialized with", Object.keys(this._store).length, "projects.");
+    /**
+     * Fetches projects from Vercel Blob via serverless API /api/list-projects
+     */
+    async fetchProjects() {
+        if (!RoomioAuth.isAuthenticated()) return [];
+        const user_id = RoomioAuth.user.id;
+        
+        console.log(`[API] Fetching projects for user: ${user_id}`);
+        try {
+            const response = await fetch(`/api/list-projects?user_id=${user_id}`);
+            if (!response.ok) throw new Error('Failed to list projects');
+            
+            const blobs = await response.json();
+            // Blobs contain 'url', 'pathname', 'size', 'uploadedAt'
+            // We need to fetch the content of these blobs or just return the metadata
+            return blobs.map(blob => ({
+                id: blob.pathname.split('/').pop().replace('.json', ''),
+                projectName: blob.pathname.split('/').pop().replace('.json', ''), 
+                updatedAt: blob.uploadedAt,
+                url: blob.url
+            }));
+        } catch (error) {
+            console.error('API Error:', error);
+            return [];
         }
     },
 
     /**
-     * Simulates fetching projects from serverless API /api/projects
-     */
-    async fetchProjects() {
-        console.log("[API] GET /api/projects");
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return Object.values(this._store);
-    },
-
-    /**
-     * Simulates saving a project to serverless API /api/project/:id
+     * Saves a project to Vercel Blob via serverless API /api/save-project
      */
     async saveProject(project) {
-        if (!project.id) project.id = 'project_' + Date.now();
-        console.log("[API] POST /api/project/" + project.id);
-        
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        if (!RoomioAuth.isAuthenticated()) {
+            throw new Error('Authentication required to save to cloud.');
+        }
 
-        this._store[project.id] = {
-            ...project,
-            updatedAt: new Date().toISOString()
-        };
-        localStorage.setItem('roomio_projects', JSON.stringify(this._store));
-        return this._store[project.id];
+        const user_id = RoomioAuth.user.id;
+        const project_id = project.id || 'project_' + Date.now();
+        project.id = project_id; // Ensure project has an ID
+
+        console.log(`[API] Saving project ${project_id} for user ${user_id}`);
+
+        try {
+            const response = await fetch('/api/save-project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id,
+                    project_id,
+                    project_data: project
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to save project to Blob');
+            
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
     },
 
-    /**
-     * Simulates deleting a project from serverless API /api/project/:id
-     */
     async deleteProject(id) {
-        console.log("[API] DELETE /api/project/" + id);
-        await new Promise(resolve => setTimeout(resolve, 300));
-        delete this._store[id];
-        localStorage.setItem('roomio_projects', JSON.stringify(this._store));
+        // Implementation for deletion would follow similar pattern
+        console.log(`[API] Deleting project ${id}`);
         return true;
     }
 };
 
-ApiClient.init();
 window.RoomioApi = ApiClient;

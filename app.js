@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cloudProjectsBtn = document.getElementById('menu-cloud-projects');
 
     const syncStatusEl = document.getElementById('sync-status');
+    const adminPanelBtn = document.getElementById('menu-admin-panel');
+    const adminModal = document.getElementById('modal-admin');
+    const adminUserList = document.getElementById('admin-user-list');
 
     function updateAuthUI(user) {
         if (user) {
@@ -17,11 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
             cloudProjectsBtn.style.opacity = '1';
             cloudProjectsBtn.style.pointerEvents = 'all';
             if (syncStatusEl) syncStatusEl.innerText = 'Connected';
+            
+            // Show/Hide Admin Panel based on role
+            if (adminPanelBtn) {
+                if (user.role === 'admin') {
+                    adminPanelBtn.style.display = 'flex';
+                } else {
+                    adminPanelBtn.style.display = 'none';
+                }
+            }
         } else {
             authBtnText.innerText = 'Sign In';
             cloudProjectsBtn.style.opacity = '0.5';
             cloudProjectsBtn.style.pointerEvents = 'none';
             if (syncStatusEl) syncStatusEl.innerText = 'Local Mode';
+            if (adminPanelBtn) adminPanelBtn.style.display = 'none';
         }
     }
 
@@ -68,6 +81,69 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAuthUI(user);
     };
     updateAuthUI(RoomioAuth.user);
+
+    // ==================== ADMIN PANEL LOGIC ====================
+    if (adminPanelBtn && adminModal) {
+        adminPanelBtn.addEventListener('click', async () => {
+            if (RoomioAuth.user?.role !== 'admin') return;
+            adminModal.classList.remove('hidden');
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            
+            // Fetch users from our new admin API
+            try {
+                const res = await fetch('/api/admin/manage-users');
+                if (!res.ok) throw new Error('Failed to fetch user list');
+                const users = await res.json();
+                renderAdminUserList(users);
+                
+                // Update stats
+                document.getElementById('admin-total-users').innerText = users.length;
+                document.getElementById('admin-total-designs').innerText = users.reduce((acc, u) => acc + (u.projectsCount || 0), 0);
+            } catch (err) {
+                console.error("Admin error:", err);
+                alert("Failed to load user management data.");
+            }
+        });
+    }
+
+    function renderAdminUserList(users) {
+        if (!adminUserList) return;
+        adminUserList.innerHTML = '';
+        
+        users.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding:12px; border-bottom:1px solid var(--border-light);">${user.email}</td>
+                <td style="padding:12px; border-bottom:1px solid var(--border-light); font-weight:700; color:var(--primary);">${user.role || 'user'}</td>
+                <td style="padding:12px; border-bottom:1px solid var(--border-light);">${user.status || 'active'}</td>
+                <td style="padding:12px; border-bottom:1px solid var(--border-light);">
+                    <button class="action-btn-sm edit-role-btn" data-email="${user.email}" data-role="${user.role || 'user'}" style="padding:4px 8px; font-size:11px; cursor:pointer;">Update Role</button>
+                </td>
+            `;
+            const editBtn = tr.querySelector('.edit-role-btn');
+            editBtn.addEventListener('click', async () => {
+                const newRole = prompt(`Update role for ${user.email} (current: ${user.role || 'user'}):`, user.role || 'user');
+                if (newRole && newRole !== user.role) {
+                    try {
+                        const res = await fetch('/api/admin/manage-users', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: user.email, role: newRole, status: user.status || 'active' })
+                        });
+                        if (res.ok) {
+                            alert("User role updated successfully.");
+                            adminPanelBtn.click(); // Refresh list
+                        } else {
+                            throw new Error("Failed to update role");
+                        }
+                    } catch (err) {
+                        alert("Error updating user: " + err.message);
+                    }
+                }
+            });
+            adminUserList.appendChild(tr);
+        });
+    }
 
     async function syncToCloud() {
         if (!RoomioAuth.isAuthenticated()) return;
