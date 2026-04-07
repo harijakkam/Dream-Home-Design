@@ -9,7 +9,13 @@
     "preview": "npx -y http-server -p 3000 -o",
     "lint": "echo 'No linter configured'"
   },
-  "keywords": ["floor-plan", "architectural-design", "2d-designer", "vastu", "canvas"],
+  "keywords": [
+    "floor-plan",
+    "architectural-design",
+    "2d-designer",
+    "vastu",
+    "canvas"
+  ],
   "author": "",
   "license": "MIT",
   "private": true
