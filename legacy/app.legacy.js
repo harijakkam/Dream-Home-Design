@@ -1074,15 +1074,25 @@ document.addEventListener('DOMContentLoaded', () => {
         guide: document.getElementById('modal-guide')
     };
 
+    let lastFocusedElement;
     function openModal(id) {
+        lastFocusedElement = document.activeElement;
         backdrop.classList.remove('hidden');
         Object.values(modals).forEach(m => m.classList.add('hidden'));
-        modals[id]?.classList.remove('hidden');
-        lucide.createIcons(); // refresh icons in content
+        const modal = modals[id];
+        if (modal) {
+            modal.classList.remove('hidden');
+            lucide.createIcons(); // refresh icons in content
+            
+            // Focus trap: focus first button
+            const focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length) focusable[0].focus();
+        }
     }
 
     function closeModal() {
         backdrop.classList.add('hidden');
+        if (lastFocusedElement) lastFocusedElement.focus();
     }
 
     document.getElementById('menu-help-shortcuts')?.addEventListener('click', () => openModal('shortcuts'));
