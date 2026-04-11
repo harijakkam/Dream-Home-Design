@@ -1,36 +1,37 @@
 # ============================================================
-# sketch my home - 2D Architectural Floor Plan Designer
-# Static site served via Nginx
+# Sketch My Home - 2D Architectural Floor Plan Designer
+# Static site served via Nginx (legacy engine)
 # ============================================================
 
 FROM nginx:1.27-alpine
 
 LABEL maintainer="sketch my home"
 LABEL description="Professional 2D Architectural Floor Plan Designer"
-LABEL version="2.0.0"
+LABEL version="2.1.0"
 
 # Remove default Nginx welcome page
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy all static assets into Nginx's web root
-COPY index.html         /usr/share/nginx/html/
-COPY style.css          /usr/share/nginx/html/
-COPY app.js             /usr/share/nginx/html/
-COPY canvas-engine.js   /usr/share/nginx/html/
-COPY tools.js           /usr/share/nginx/html/
-COPY elements.js        /usr/share/nginx/html/
-COPY event-bus.js       /usr/share/nginx/html/
-COPY crypto.js          /usr/share/nginx/html/
-COPY branding-assets.js /usr/share/nginx/html/
-COPY logo.png           /usr/share/nginx/html/
+# --- Copy the main entry HTML (use legacy version as the standalone app) ---
+COPY index.legacy.html   /usr/share/nginx/html/index.html
 
-# Copy sub-directories
-COPY components/        /usr/share/nginx/html/components/
-COPY lib/               /usr/share/nginx/html/lib/
-COPY utils/             /usr/share/nginx/html/utils/
-COPY app/               /usr/share/nginx/html/app/
+# --- Copy all JS/CSS from the legacy folder (the actual running engine) ---
+COPY legacy/style.css          /usr/share/nginx/html/style.css
+COPY legacy/app.legacy.js      /usr/share/nginx/html/app.js
+COPY legacy/canvas-engine.js   /usr/share/nginx/html/canvas-engine.js
+COPY legacy/tools.js           /usr/share/nginx/html/tools.js
+COPY legacy/elements.js        /usr/share/nginx/html/elements.js
+COPY legacy/event-bus.js       /usr/share/nginx/html/event-bus.js
+COPY legacy/crypto.js          /usr/share/nginx/html/crypto.js
+COPY legacy/auth.js            /usr/share/nginx/html/auth.js
+COPY legacy/api-client.js       /usr/share/nginx/html/api-client.js
+COPY legacy/branding-assets.js /usr/share/nginx/html/branding-assets.js
 
-# Custom Nginx config: SPA fallback + gzip compression
+# --- Copy branding assets and other public files to root ---
+# index.html expects logo.png in the same directory
+COPY public/*                  /usr/share/nginx/html/
+
+# --- Custom Nginx config: SPA fallback + gzip compression ---
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

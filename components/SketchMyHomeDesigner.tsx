@@ -43,6 +43,11 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
       engineRef.current = new CanvasEngine(canvasRef.current);
       toolsRef.current = new ToolsManager(engineRef.current);
       toolsRef.current.setTool('select');
+
+      // Sync selection state with React
+      engineRef.current.onSelectionChange = (items: any[]) => {
+        setSelectedItems([...items]);
+      };
     }
 
     const handleResize = () => {
@@ -97,6 +102,47 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
        const data: UserRegistryItem[] = await res.json();
        setAdminUsers(data);
      } catch (e) { console.error(e); }
+  };
+
+  const handleThicknessChange = (val: number) => {
+    if (!engineRef.current) return;
+    const pxVal = Math.round(val * (engineRef.current.gridSize / 12) * 100) / 100;
+    
+    engineRef.current.selectedItems.forEach((item: any) => {
+      if (item.type === 'wall') {
+        item.thickness = pxVal;
+      }
+    });
+    
+    engineRef.current.render();
+    setSelectedItems([...engineRef.current.selectedItems]);
+  };
+
+  const handleLineTypeChange = (val: string) => {
+    if (!engineRef.current) return;
+    engineRef.current.selectedItems.forEach((item: any) => {
+      if (item.type === 'wall') {
+        item.lineType = val;
+      }
+    });
+    engineRef.current.render();
+    setSelectedItems([...engineRef.current.selectedItems]);
+  };
+
+  const handleAltitudeChange = (val: number) => {
+    if (!engineRef.current) return;
+    engineRef.current.selectedItems.forEach((item: any) => {
+      if (item.type === 'wall') {
+        item.altitude = val;
+      }
+    });
+    engineRef.current.render();
+    setSelectedItems([...engineRef.current.selectedItems]);
+  };
+
+  const getInchesFromPx = (px: number) => {
+    if (!engineRef.current) return 9;
+    return Math.round(px / (engineRef.current.gridSize / 12));
   };
 
   const handleLogin = async (): Promise<void> => {
@@ -267,6 +313,105 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
         </div>
         <div className="canvas-container relative">
            <canvas ref={canvasRef} />
+           
+           {/* Properties Panel (Integrated into Canvas space) */}
+           {selectedItems.length > 0 && (
+             <div className="absolute top-6 right-6 w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-black/10 overflow-hidden z-20 transition-all duration-300 animate-in fade-in slide-in-from-right-4">
+                <div className="px-4 py-3 border-b border-black/10 bg-black/5 flex justify-between items-center">
+                   <h3 className="text-sm font-bold opacity-80 uppercase tracking-widest flex items-center gap-2">
+                     <Square size={14} className="text-primary" /> Properties
+                   </h3>
+                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
+                     {selectedItems.length} {selectedItems.length === 1 ? 'Item' : 'Items'}
+                   </span>
+                </div>
+                <div className="p-4 flex flex-col gap-6">
+                   {selectedItems.length === 1 && selectedItems[0].type === 'wall' && (
+                     <div className="flex flex-col gap-3">
+                        <label className="text-[10px] uppercase tracking-widest font-bold opacity-50">Wall Thickness</label>
+                        <div className="flex flex-col gap-2">
+                           <div className="flex justify-between items-center text-xs">
+                              <span className="font-mono text-primary font-bold">{getInchesFromPx(selectedItems[0].thickness || 9 * (engineRef.current?.gridSize || 20) / 12)}"</span>
+                              <span className="opacity-40 tracking-tighter">1" — 36"</span>
+                           </div>
+                           <input 
+                             type="range" 
+                             min="1" 
+                             max="36" 
+                             value={getInchesFromPx(selectedItems[0].thickness || 9 * (engineRef.current?.gridSize || 20) / 12)} 
+                             className="w-full h-1.5 bg-black/5 rounded-lg appearance-none cursor-pointer accent-primary"
+                             onChange={(e) => handleThicknessChange(parseInt(e.target.value))}
+                           />
+                        </div>
+                     </div>
+                   )}
+
+                   {selectedItems.length === 1 && selectedItems[0].type === 'wall' && (
+                     <div className="flex flex-col gap-3 pt-4 border-t border-black/5">
+                        <label className="text-[10px] uppercase tracking-widest font-bold opacity-50">Visual Style</label>
+                        <select 
+                          value={selectedItems[0].lineType || 'solid'}
+                          className="w-full bg-black/5 border border-black/10 rounded-lg p-2 text-xs outline-none focus:border-primary transition-colors"
+                          onChange={(e) => handleLineTypeChange(e.target.value)}
+                        >
+                          <option value="solid">Solid Wall</option>
+                          <option value="dotted">Dotted (Half Wall)</option>
+                        </select>
+                     </div>
+                   )}
+
+                   {selectedItems.length === 1 && selectedItems[0].type === 'wall' && (
+                     <div className="flex flex-col gap-3 pt-4 border-t border-black/5">
+                        <label className="text-[10px] uppercase tracking-widest font-bold opacity-50">Wall Altitude (Height)</label>
+                        <div className="flex flex-col gap-2">
+                           <div className="flex justify-between items-center text-xs">
+                              <span className="font-mono text-blue-500 font-bold">{selectedItems[0].altitude || 8}ft</span>
+                              <span className="opacity-40 tracking-tighter">1ft — 30ft</span>
+                           </div>
+                           <input 
+                             type="range" 
+                             min="1" 
+                             max="30" 
+                             step="0.5"
+                             value={selectedItems[0].altitude || 8} 
+                             className="w-full h-1.5 bg-black/5 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                             onChange={(e) => handleAltitudeChange(parseFloat(e.target.value))}
+                           />
+                        </div>
+                     </div>
+                   )}
+
+                   {selectedItems.length === 1 && selectedItems[0].type === 'object' && (
+                     <div className="text-xs space-y-2">
+                        <div className="flex justify-between border-b border-black/5 pb-2">
+                           <span className="opacity-50">Type</span>
+                           <span className="font-bold uppercase tracking-tight">{selectedItems[0].subType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                           <span className="opacity-50">Dimensions</span>
+                           <span className="font-mono">{engineRef.current?.pixelsToFeet(selectedItems[0].width)} x {engineRef.current?.pixelsToFeet(selectedItems[0].height)}</span>
+                        </div>
+                     </div>
+                   )}
+
+                   {selectedItems.length > 1 && (
+                     <div className="text-xs opacity-60 italic text-center py-4 bg-black/5 rounded-lg border border-dashed border-black/10">
+                        Multi-select tools coming soon...
+                     </div>
+                   )}
+
+                   <div className="pt-2 border-t border-black/5 flex gap-2">
+                      <button 
+                        className="flex-1 text-[11px] font-bold py-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all flex items-center justify-center gap-2"
+                        onClick={() => toolsRef.current?.setTool('delete')}
+                      >
+                        <Trash2 size={12} /> Delete
+                      </button>
+                   </div>
+                </div>
+             </div>
+           )}
+
            <div className="absolute bottom-6 right-6 flex items-center gap-1 bg-white/90 p-1.5 rounded-lg border border-black/10 z-10 backdrop-blur-sm">
              <button className="p-2 hover:bg-black/10 rounded text-black/70 hover:text-black transition-colors" onClick={() => engineRef.current && (engineRef.current.scale = Math.max(0.1, engineRef.current.scale - 0.1), engineRef.current.render())} title="Zoom Out">
                 <Minus size={16} />
