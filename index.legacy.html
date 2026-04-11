@@ -140,7 +140,9 @@
             </div>
 
             <div style="flex:1;"></div>
-            <div id="sync-status" style="font-size:10px; color:var(--text-muted); opacity:0.6; margin-right:16px; font-weight:500;">Local Mode</div>
+            <div id="sync-status"
+                style="font-size:10px; color:var(--text-muted); opacity:0.6; margin-right:16px; font-weight:500;">Local
+                Mode</div>
             <div
                 style="padding-right:12px; font-weight:700; font-size:12px; color:var(--primary); letter-spacing:0.5px;">
                 SKETCH MY HOME</div>
@@ -515,9 +517,9 @@
                 </div>
                 <div class="modal-body" style="text-align: center;">
                     <img src="logo.png" alt="Sketch My Home Logo"
-                        style="width: 80px; height: 80px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); margin-bottom: 24px; object-fit: contain; border: 2px solid var(--primary); background: white; padding: 8px;">
+                        style="width: 60px; height: 60px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); margin-bottom: 24px; object-fit: contain; border: 2px solid var(--primary); background: white; padding: 8px;">
                     <h2>sketch my home</h2>
-                    <p style="opacity: 0.7; margin-bottom: 24px;">Professional 2D Floor Plan Solution</p>
+                    <p style="opacity: 0.4; margin-bottom: 24px;">Professional 2D Floor Plan Solution</p>
                     <p>Version 2.2.4 (Enterprise Edition)</p>
                     <p style="margin-top: 12px; font-size: 13px;">Built with Vanilla JS & HTML5 Canvas.<br>Secure AES
                         Encrypted Save System Enabled.</p>
@@ -530,31 +532,40 @@
             <!-- Admin Dashboard Modal -->
             <div id="modal-admin" class="modal hidden" style="width: 800px; max-width: 95%;">
                 <div class="modal-header">
-                    <h3><i data-lucide="shield" style="width:18px;height:18px;margin-right:8px;"></i> Admin Dashboard</h3>
+                    <h3><i data-lucide="shield" style="width:18px;height:18px;margin-right:8px;"></i> Admin Dashboard
+                    </h3>
                     <button class="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="admin-stats" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:24px;">
-                        <div class="stat-card" style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                    <div class="admin-stats"
+                        style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:24px;">
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
                             <div style="font-size:12px; color:var(--text-muted);">Total Users</div>
-                            <div id="admin-total-users" style="font-size:24px; font-weight:700; color:var(--primary);">312</div>
+                            <div id="admin-total-users" style="font-size:24px; font-weight:700; color:var(--primary);">
+                                312</div>
                         </div>
-                        <div class="stat-card" style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
                             <div style="font-size:12px; color:var(--text-muted);">Total Designs</div>
-                            <div id="admin-total-designs" style="font-size:24px; font-weight:700; color:#a855f7;">1,542</div>
+                            <div id="admin-total-designs" style="font-size:24px; font-weight:700; color:#a855f7;">1,542
+                            </div>
                         </div>
-                        <div class="stat-card" style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
                             <div style="font-size:12px; color:var(--text-muted);">Platform Health</div>
                             <div id="admin-status" style="font-size:24px; font-weight:700; color:#22c55e;">OPR</div>
                         </div>
                     </div>
-                    
+
                     <h4>User Access Management</h4>
-                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 8px;">
+                    <div
+                        style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 8px;">
                         <table style="width:100%; border-collapse: collapse; font-size:13px; text-align: left;">
                             <thead style="background:rgba(0,0,0,0.2); color:var(--text-muted);">
                                 <tr>
-                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">User Email</th>
+                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">User Email
+                                    </th>
                                     <th style="padding:12px; border-bottom:1px solid var(--border-light);">Role</th>
                                     <th style="padding:12px; border-bottom:1px solid var(--border-light);">Status</th>
                                     <th style="padding:12px; border-bottom:1px solid var(--border-light);">Manage</th>
@@ -572,65 +583,88 @@
             <div id="modal-auth" class="modal hidden" style="width: 420px; overflow:visible;">
                 <div class="modal-header" style="justify-content: center; border-bottom:none; padding-top:32px;">
                     <div style="text-align: center;">
-                        <h2 id="auth-title" style="font-size:24px; font-weight:800; margin-bottom:8px; color:var(--primary);">Welcome Back</h2>
-                        <p id="auth-subtitle" style="font-size:13px; color:var(--text-muted);">Continue your architectural journey</p>
+                        <h2 id="auth-title"
+                            style="font-size:24px; font-weight:800; margin-bottom:8px; color:var(--primary);">Welcome
+                            Back</h2>
+                        <p id="auth-subtitle" style="font-size:13px; color:var(--text-muted);">Continue your
+                            architectural journey</p>
                     </div>
                     <button class="modal-close" style="position:absolute; top:16px; right:16px;">&times;</button>
                 </div>
                 <div class="modal-body" style="padding: 0 32px 32px 32px;">
                     <form id="auth-form" style="display:flex; flex-direction:column; gap:16px;">
                         <div class="form-group">
-                            <label for="auth-email" style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Email Address</label>
-                            <input type="email" id="auth-email" placeholder="name@company.com" required 
+                            <label for="auth-email"
+                                style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Email
+                                Address</label>
+                            <input type="email" id="auth-email" placeholder="name@company.com" required
                                 style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid var(--border-light); border-radius:8px; color:var(--text-main); font-family:inherit; outline:none; transition: border-color 0.2s;">
                         </div>
                         <div class="form-group" style="position:relative;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <label for="auth-password" style="font-size:12px; font-weight:600; color:var(--text-muted);">Password</label>
-                                <a href="#" id="auth-forgot" style="font-size:11px; color:var(--primary); text-decoration:none;">Forgot?</a>
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label for="auth-password"
+                                    style="font-size:12px; font-weight:600; color:var(--text-muted);">Password</label>
+                                <a href="#" id="auth-forgot"
+                                    style="font-size:11px; color:var(--primary); text-decoration:none;">Forgot?</a>
                             </div>
                             <div style="position:relative; width:100%;">
-                                <input type="password" id="auth-password" placeholder="••••••••" required 
+                                <input type="password" id="auth-password" placeholder="••••••••" required
                                     style="width:100%; padding:12px; padding-right:40px; background:rgba(255,255,255,0.05); border:1px solid var(--border-light); border-radius:8px; color:var(--text-main); font-family:inherit; outline:none; transition: border-color 0.2s;">
-                                <button type="button" id="auth-toggle-pass" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0; height:auto; width:auto;">
+                                <button type="button" id="auth-toggle-pass"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0; height:auto; width:auto;">
                                     <i data-lucide="eye" style="width:16px; height:16px;"></i>
                                 </button>
                             </div>
                         </div>
-                        
-                        <div id="auth-error" class="hidden" style="background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); color:var(--danger); padding:10px; border-radius:6px; font-size:12px; text-align:center;">
+
+                        <div id="auth-error" class="hidden"
+                            style="background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); color:var(--danger); padding:10px; border-radius:6px; font-size:12px; text-align:center;">
                             Invalid email or password. Please try again.
                         </div>
-                        
+
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <input type="checkbox" id="auth-remember" style="width:14px; height:14px; accent-color:var(--primary);">
-                            <label for="auth-remember" style="font-size:12px; color:var(--text-muted); cursor:pointer;">Keep me signed in</label>
+                            <input type="checkbox" id="auth-remember"
+                                style="width:14px; height:14px; accent-color:var(--primary);">
+                            <label for="auth-remember"
+                                style="font-size:12px; color:var(--text-muted); cursor:pointer;">Keep me signed
+                                in</label>
                         </div>
 
-                        <button type="submit" id="auth-submit-btn" class="action-btn primary" style="padding:14px; font-weight:700; margin-top:8px; display:flex; justify-content:center; align-items:center; gap:10px;">
+                        <button type="submit" id="auth-submit-btn" class="action-btn primary"
+                            style="padding:14px; font-weight:700; margin-top:8px; display:flex; justify-content:center; align-items:center; gap:10px;">
                             <span id="auth-submit-text">Sign In</span>
-                            <div id="auth-spinner" class="spinner hidden" style="width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation: spin 0.8s linear infinite;"></div>
+                            <div id="auth-spinner" class="spinner hidden"
+                                style="width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation: spin 0.8s linear infinite;">
+                            </div>
                         </button>
 
                         <div style="display:flex; align-items:center; gap:12px; margin:8px 0;">
                             <div style="flex:1; height:1px; background:var(--border-light);"></div>
-                            <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">or continue with</span>
+                            <span
+                                style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">or
+                                continue with</span>
                             <div style="flex:1; height:1px; background:var(--border-light);"></div>
                         </div>
 
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                            <button type="button" class="action-btn" style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
-                                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" style="width:16px; height:16px; filter:grayscale(1) brightness(1.5);"> Google
+                            <button type="button" class="action-btn"
+                                style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
+                                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+                                    style="width:16px; height:16px; filter:grayscale(1) brightness(1.5);"> Google
                             </button>
-                            <button type="button" class="action-btn" style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
+                            <button type="button" class="action-btn"
+                                style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
                                 <i data-lucide="github" style="width:16px; height:16px;"></i> GitHub
                             </button>
                         </div>
                     </form>
-                    
+
                     <div style="text-align:center; margin-top:24px; font-size:13px; color:var(--text-muted);">
                         <span id="auth-switch-text">Don't have an account?</span>
-                        <a href="#" id="auth-switch-btn" style="color:var(--primary); font-weight:700; text-decoration:none; margin-left:4px;">Sign Up</a>
+                        <a href="#" id="auth-switch-btn"
+                            style="color:var(--primary); font-weight:700; text-decoration:none; margin-left:4px;">Sign
+                            Up</a>
                     </div>
                 </div>
             </div>

@@ -198,10 +198,24 @@ export class CanvasEngine {
     private drawWall(shape: Shape, isSelected: boolean) {
         this.ctx.save();
         this.ctx.strokeStyle = isSelected ? '#6366f1' : this.wallColor;
-        this.ctx.lineWidth = shape.thickness || 6;
+        const t = shape.thickness || 6;
+        const half = t / 2;
+        this.ctx.lineWidth = t;
+
+        let ox = 0, oy = 0;
+        if (shape.type === 'wall') {
+            let dx = shape.endX - shape.startX;
+            let dy = shape.endY - shape.startY;
+            let len = Math.hypot(dx, dy);
+            if (len > 0) {
+                ox = (-dy / len) * half;
+                oy = (dx / len) * half;
+            }
+        }
+
         this.ctx.beginPath();
-        this.ctx.moveTo(shape.startX, shape.startY);
-        this.ctx.lineTo(shape.endX, shape.endY);
+        this.ctx.moveTo(shape.startX + ox, shape.startY + oy);
+        this.ctx.lineTo(shape.endX + ox, shape.endY + oy);
         this.ctx.stroke();
         this.ctx.restore();
     }
@@ -210,9 +224,11 @@ export class CanvasEngine {
         this.ctx.save();
         this.ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.2)' : this.compFill;
         this.ctx.strokeStyle = isSelected ? '#6366f1' : this.compColor;
-        this.ctx.lineWidth = 2;
+        const t = 2;
+        const half = t / 2;
+        this.ctx.lineWidth = t;
         this.ctx.fillRect(shape.x, shape.y, shape.width, shape.height);
-        this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+        this.ctx.strokeRect(shape.x + half, shape.y + half, shape.width - t, shape.height - t);
         this.ctx.restore();
     }
 
