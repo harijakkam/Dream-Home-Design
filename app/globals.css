@@ -6,13 +6,13 @@
 
 :root {
     --primary: #6366f1;
-    --bg-dark: #121214;
-    --bg-canvas: #1e1e22;
-    --panel-bg: rgba(30, 30, 34, 0.9);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --border-color: #334155;
-    --border-light: rgba(255, 255, 255, 0.1);
+    --bg-dark: #f8fafc;
+    --bg-canvas: #ffffff;
+    --panel-bg: rgba(255, 255, 255, 0.9);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-light: rgba(0, 0, 0, 0.1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,7 +33,7 @@ body {
 
 .win-menu-bar { 
     height: 32px; 
-    background: #1e1e22; 
+    background: #ffffff; 
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -51,7 +51,7 @@ body {
 
 .menu-item:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .app-container { 
@@ -95,7 +95,7 @@ body {
 }
 
 .tool-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--text-main);
 }
 

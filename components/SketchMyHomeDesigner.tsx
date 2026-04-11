@@ -151,8 +151,8 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
         {/* Admin Modal Overlay */}
         {showAdminModal && (
           <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-             <div className="bg-[#1e1e22] border border-white/10 rounded-xl w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col">
-                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+             <div className="bg-white border border-black/10 rounded-xl w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl flex flex-col">
+                <div className="p-6 border-b border-black/10 flex justify-between items-center">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <User size={20} className="text-primary" /> Admin Space Management
                   </h2>
@@ -160,18 +160,18 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                 </div>
                 <div className="flex-1 overflow-y-auto p-6">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                      <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                      <div className="bg-black/5 p-4 rounded-lg border border-black/10">
                         <span className="text-[10px] uppercase tracking-widest opacity-50">Total Users</span>
                         <div className="text-2xl font-bold text-primary">{adminUsers.length || '--'}</div>
                       </div>
-                      <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                      <div className="bg-black/5 p-4 rounded-lg border border-black/10">
                         <span className="text-[10px] uppercase tracking-widest opacity-50">System Status</span>
                         <div className="text-2xl font-bold text-blue-400">Stable</div>
                       </div>
                    </div>
 
                    <table className="w-full text-left">
-                      <thead className="text-[10px] uppercase tracking-widest opacity-50 border-b border-white/10">
+                      <thead className="text-[10px] uppercase tracking-widest opacity-50 border-b border-black/10">
                         <tr>
                           <th className="pb-4">User Email</th>
                           <th className="pb-4">Role</th>
@@ -180,29 +180,29 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                       </thead>
                       <tbody className="text-sm">
                         {adminUsers.map((u) => (
-                           <tr key={u.email} className="border-b border-white/5">
+                           <tr key={u.email} className="border-b border-black/5">
                               <td className="py-4">{u.email}</td>
                               <td className="py-4 font-bold text-primary">{u.role}</td>
                               <td className="py-4">
-                                 <button className="text-xs bg-white/5 px-2 py-1 rounded">Update</button>
+                                 <button className="text-xs bg-black/5 px-2 py-1 rounded">Update</button>
                               </td>
                            </tr>
                         ))}
                       </tbody>
                    </table>
                 </div>
-                <div className="p-4 border-t border-white/10 flex justify-end">
-                   <button onClick={() => setShowAdminModal(false)} className="px-4 py-2 bg-white/5 rounded text-sm">Close Panel</button>
+                <div className="p-4 border-t border-black/10 flex justify-end">
+                   <button onClick={() => setShowAdminModal(false)} className="px-4 py-2 bg-black/5 rounded text-sm">Close Panel</button>
                 </div>
              </div>
           </div>
         )}
-        <div className="w-[240px] flex-shrink-0 border-r border-white/10 bg-[#1e1e22] relative flex flex-col pt-6 h-full pb-0 z-20">
+        <div className="w-[240px] flex-shrink-0 border-r border-black/10 bg-white relative flex flex-col pt-6 h-full pb-0 z-20">
           <div className="brand px-4">
             <h1>sketch my home</h1>
           </div>
           <div className="tools-group h-full overflow-y-auto no-scrollbar pb-24">
-            <h3 className="text-xs uppercase text-white/50 mb-2 px-2 tracking-widest font-bold">Tools</h3>
+            <h3 className="text-xs uppercase text-black/50 mb-2 px-2 tracking-widest font-bold">Tools</h3>
             <button className={`tool-btn ${activeTool === 'select' ? 'active' : ''}`} onClick={() => handleToolClick('select')}>
               <MousePointer size={20} /> <span>Select</span>
             </button>
@@ -219,7 +219,7 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
               <Maximize2 size={20} /> <span>Area</span>
             </button>
 
-            <h3 className="text-xs uppercase text-white/50 mt-4 mb-2 px-2 tracking-widest font-bold border-t border-white/10 pt-4">Elements</h3>
+            <h3 className="text-xs uppercase text-black/50 mt-4 mb-2 px-2 tracking-widest font-bold border-t border-black/10 pt-4">Elements</h3>
             <div className="grid grid-cols-2 gap-2">
               <button className={`tool-btn !min-h-[60px] !h-auto ${activeTool === 'door' ? 'active' : ''}`} onClick={() => handleToolClick('door')}>
                 <DoorOpen size={16} /> <span className="text-[9px]">Door</span>
@@ -253,12 +253,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
               </button>
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 w-full p-4 bg-[#1e1e22] border-t border-white/10 flex flex-col gap-2 z-10 w-[240px]">
+          <div className="absolute bottom-0 left-0 w-full p-4 bg-white border-t border-black/10 flex flex-col gap-2 z-10 w-[240px]">
              <div className="flex gap-2 w-full">
-                <button className="action-btn flex-1 bg-white/5 opacity-80 hover:opacity-100 !h-10" onClick={() => toolsRef.current?.setTool('delete')}>
+                <button className="action-btn flex-1 bg-black/5 opacity-80 hover:opacity-100 !h-10" onClick={() => toolsRef.current?.setTool('delete')}>
                    <Trash2 size={16} />
                 </button>
-                <button className="action-btn flex-1 bg-white/5 opacity-80 hover:opacity-100 !h-10" onClick={() => engineRef.current?.undo()}>
+                <button className="action-btn flex-1 bg-black/5 opacity-80 hover:opacity-100 !h-10" onClick={() => engineRef.current?.undo()}>
                    <Undo size={16} />
                 </button>
              </div>
@@ -267,14 +267,14 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
         </div>
         <div className="canvas-container relative">
            <canvas ref={canvasRef} />
-           <div className="absolute bottom-6 right-6 flex items-center gap-1 bg-[#1e1e22]/90 p-1.5 rounded-lg border border-white/10 z-10 backdrop-blur-sm">
-             <button className="p-2 hover:bg-white/10 rounded text-white/70 hover:text-white transition-colors" onClick={() => engineRef.current && (engineRef.current.scale = Math.max(0.1, engineRef.current.scale - 0.1), engineRef.current.render())} title="Zoom Out">
+           <div className="absolute bottom-6 right-6 flex items-center gap-1 bg-white/90 p-1.5 rounded-lg border border-black/10 z-10 backdrop-blur-sm">
+             <button className="p-2 hover:bg-black/10 rounded text-black/70 hover:text-black transition-colors" onClick={() => engineRef.current && (engineRef.current.scale = Math.max(0.1, engineRef.current.scale - 0.1), engineRef.current.render())} title="Zoom Out">
                 <Minus size={16} />
              </button>
-             <button className="p-2 hover:bg-white/10 rounded text-white/70 hover:text-white transition-colors text-xs font-bold w-12 text-center" onClick={() => engineRef.current && (engineRef.current.scale = 1, engineRef.current.offsetX = 0, engineRef.current.offsetY = 0, engineRef.current.render())} title="Reset Zoom">
+             <button className="p-2 hover:bg-black/10 rounded text-black/70 hover:text-black transition-colors text-xs font-bold w-12 text-center" onClick={() => engineRef.current && (engineRef.current.scale = 1, engineRef.current.offsetX = 0, engineRef.current.offsetY = 0, engineRef.current.render())} title="Reset Zoom">
                 100%
              </button>
-             <button className="p-2 hover:bg-white/10 rounded text-white/70 hover:text-white transition-colors" onClick={() => engineRef.current && (engineRef.current.scale = Math.min(5, engineRef.current.scale + 0.1), engineRef.current.render())} title="Zoom In">
+             <button className="p-2 hover:bg-black/10 rounded text-black/70 hover:text-black transition-colors" onClick={() => engineRef.current && (engineRef.current.scale = Math.min(5, engineRef.current.scale + 0.1), engineRef.current.render())} title="Zoom In">
                 <Plus size={16} />
              </button>
            </div>
