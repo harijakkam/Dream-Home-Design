@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Roomio | Professional 2D Floor Plan Designer',
+  title: 'sketch my home | Professional 2D Floor Plan Designer',
   description: 'Zero-install 2D architectural floor plan designer with Vastu grid support and cloud persistence.',
 };
 

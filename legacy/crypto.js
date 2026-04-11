@@ -1,24 +1,24 @@
 /**
- * RoomioCrypto — Pluggable encryption layer for project files.
+ * SketchMyHomeCrypto — Pluggable encryption layer for project files.
  * 
  * Strategy pattern: swap between 'basic' (XOR + Base64) and 'aes' (AES-256-GCM)
  * via setStrategy(). The 'aes' strategy uses the Web Crypto API and requires a
  * user-supplied passphrase (for future session-based auth).
  *
- * Encrypted files are plain text with the header: ROOMIO_ENC:{strategy}:
+ * Encrypted files are plain text with the header: SKETCH_MY_HOME_ENC:{strategy}:
  * followed by the encoded payload. This allows the loader to auto-detect
  * encrypted vs plain JSON files.
  */
 
-const RoomioCrypto = (() => {
+const SketchMyHomeCrypto = (() => {
     // ---- Active strategy ----
     let currentStrategy = 'basic'; // 'basic' | 'aes'
 
     // ---- Internal key (basic strategy) ----
-    const BASIC_KEY = 'R00mi0-2025-FloorPlan-Designer';
+    const BASIC_KEY = 'Sk3tchMyH0m3-2026-FloorPlan-Designer';
 
     // ---- File header prefix ----
-    const HEADER_PREFIX = 'ROOMIO_ENC:';
+    const HEADER_PREFIX = 'SKETCH_MY_HOME_ENC:';
 
     // =========================================================================
     // BASIC STRATEGY — XOR cipher + Base64
@@ -141,7 +141,7 @@ const RoomioCrypto = (() => {
         },
 
         /**
-         * Check if a string is an encrypted Roomio file.
+         * Check if a string is an encrypted SketchMyHome file.
          * @param {string} content — file content
          * @returns {boolean}
          */
@@ -183,7 +183,7 @@ const RoomioCrypto = (() => {
          */
         async decrypt(content, passphrase) {
             const strategy = this.detectStrategy(content);
-            if (!strategy) throw new Error('Not a valid encrypted Roomio file.');
+            if (!strategy) throw new Error('Not a valid encrypted SketchMyHome file.');
 
             const headerLen = (HEADER_PREFIX + strategy + ':').length;
             const payload = content.substring(headerLen);

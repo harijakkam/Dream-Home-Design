@@ -1,5 +1,5 @@
 /**
- * lib/roomio/event-bus.ts — Lightweight Pub/Sub Event Bus
+ * lib/sketch-my-home/event-bus.ts — Lightweight Pub/Sub Event Bus
  */
 
 class EventBus {

@@ -1,10 +1,10 @@
 /**
- * lib/roomio/crypto.ts — Pluggable encryption layer
+ * lib/sketch-my-home/crypto.ts — Pluggable encryption layer
  */
 
-export class RoomioCryptoService {
-    private readonly BASIC_KEY = 'R00mi0-2025-FloorPlan-Designer';
-    private readonly HEADER_PREFIX = 'ROOMIO_ENC:';
+export class SketchMyHomeCryptoService {
+    private readonly BASIC_KEY = 'Sk3tchMyH0m3-2026-FloorPlan-Designer';
+    private readonly HEADER_PREFIX = 'SKETCH_MY_HOME_ENC:';
 
     isEncrypted(content: any): boolean {
         return typeof content === 'string' && content.startsWith(this.HEADER_PREFIX);
@@ -20,4 +20,4 @@ export class RoomioCryptoService {
     }
 }
 
-export const RoomioCrypto = new RoomioCryptoService();
+export const SketchMyHomeCrypto = new SketchMyHomeCryptoService();

@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/dependencies-zero-f59e0b?style=for-the-badge" alt="Dependencies">
 </p>
 
-# 🏠 Dream Home Designer
+# 🏠 sketch my home
 
 A **professional, zero-install** browser-based architectural floor plan designer with Vastu grid support, multi-tab workspaces, and a live JSON editor. Built entirely with vanilla HTML5 Canvas, CSS, and JavaScript — no frameworks, no build step, no backend.
 
@@ -200,7 +200,7 @@ Each module depends only on the ones loaded before it.
 ## 📁 File Structure
 
 ```
-roomio/
+sketch-my-home/
 ├── index.html          Main HTML (UI structure + SEO)
 ├── style.css           Design system & component styles
 ├── event-bus.js        Lightweight pub/sub event bus

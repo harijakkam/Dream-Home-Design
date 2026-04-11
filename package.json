@@ -1,7 +1,8 @@
 {
-  "name": "roomio",
+  "name": "sketch-my-home",
   "version": "2.1.0",
   "private": true,
+  "description": "Professional zero-install 2D architectural floor plan designer with Vastu grid support",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -26,5 +27,14 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8",
     "eslint-config-next": "14.2.3"
-  }
+  },
+  "keywords": [
+    "floor-plan",
+    "architectural-design",
+    "2d-designer",
+    "vastu",
+    "canvas"
+  ],
+  "author": "",
+  "license": "MIT"
 }

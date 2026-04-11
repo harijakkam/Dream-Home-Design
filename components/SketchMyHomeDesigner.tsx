@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * components/RoomioDesigner.tsx
- * High-performance React wrapper for the Roomio 2D Floor Plan Designer.
+ * components/SketchMyHomeDesigner.tsx
+ * High-performance React wrapper for the Sketch My Home 2D Floor Plan Designer.
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { CanvasEngine } from '@/lib/roomio/engine';
+import { CanvasEngine } from '@/lib/sketch-my-home/engine';
 import { createClient } from '@/utils/supabase/client';
 import { Layout, Hammer, Square, Trash2, Undo, Save, User, LogIn } from 'lucide-react';
 
@@ -24,10 +24,11 @@ interface UserRegistryItem {
   updatedAt?: string;
 }
 
-export default function RoomioDesigner({ initialUser }: { initialUser: AppUser | null }) {
+export default function SketchMyHomeDesigner({ initialUser }: { initialUser: AppUser | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<CanvasEngine | null>(null);
   const [user, setUser] = useState<AppUser | null>(initialUser);
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminUsers, setAdminUsers] = useState<UserRegistryItem[]>([]);
   const supabase = createClient();
@@ -164,7 +165,7 @@ export default function RoomioDesigner({ initialUser }: { initialUser: AppUser |
         )}
         <div className="toolbar">
           <div className="brand">
-            <h1>Roomio</h1>
+            <h1>sketch my home</h1>
           </div>
           <div className="tools-group">
             <button className="tool-btn active"><Layout size={20} /> <span>Room</span></button>

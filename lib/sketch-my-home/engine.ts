@@ -1,7 +1,7 @@
 import { ElementRegistry } from './elements';
 
 /**
- * lib/roomio/engine.ts — Core Canvas Rendering and Interaction Engine
+ * lib/sketch-my-home/engine.ts — Core Canvas Rendering and Interaction Engine
  */
 
 export interface Point {

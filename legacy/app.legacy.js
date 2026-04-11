@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let fileContent, fileExt;
 
             if (document.getElementById('encrypt-toggle')?.checked) {
-                fileContent = await RoomioCrypto.encrypt(jsonStr);
+                fileContent = await SketchMyHomeCrypto.encrypt(jsonStr);
                 fileExt = 'rproj';
             } else {
                 fileContent = jsonStr;
@@ -836,9 +836,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 rawContent = rawContent.replace(/^\uFEFF/, "").trim();
 
                 // Auto-detect encrypted files
-                if (typeof RoomioCrypto !== 'undefined' && RoomioCrypto.isEncrypted(rawContent)) {
+                if (typeof SketchMyHomeCrypto !== 'undefined' && SketchMyHomeCrypto.isEncrypted(rawContent)) {
                     console.log("Encrypted project detected. Initiatives decryption strategy...");
-                    const strategy = RoomioCrypto.detectStrategy(rawContent);
+                    const strategy = SketchMyHomeCrypto.detectStrategy(rawContent);
                     let passphrase = null;
 
                     if (strategy === 'aes') {
@@ -848,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
                     }
-                    rawContent = await RoomioCrypto.decrypt(rawContent, passphrase);
+                    rawContent = await SketchMyHomeCrypto.decrypt(rawContent, passphrase);
                 }
 
                 let parsed;

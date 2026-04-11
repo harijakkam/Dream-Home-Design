@@ -1,5 +1,5 @@
 /**
- * lib/roomio/elements.ts — Declarative Element Registry
+ * lib/sketch-my-home/elements.ts — Declarative Element Registry
  */
 
 export interface ElementDefinition {

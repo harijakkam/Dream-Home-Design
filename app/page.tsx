@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
-import RoomioDesigner from '@/components/RoomioDesigner';
+import SketchMyHomeDesigner from '@/components/SketchMyHomeDesigner';
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -10,7 +10,7 @@ export default async function Page() {
   const { data: todos } = await supabase.from('todos').select();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Map to AppUser interface for RoomioDesigner
+  // Map to AppUser interface for SketchMyHomeDesigner
   const initialUser = user ? {
      id: user.id,
      email: user.email,
@@ -19,7 +19,7 @@ export default async function Page() {
 
   return (
     <main className="app-container">
-      <RoomioDesigner initialUser={initialUser} />
+      <SketchMyHomeDesigner initialUser={initialUser} />
       
       {/* Sample Todos display from original request */}
       {todos && todos.length > 0 && (

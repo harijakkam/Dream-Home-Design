@@ -1,0 +1,31 @@
+# Version control
+.git
+.gitignore
+
+# Editor / IDE
+.vscode
+*.code-workspace
+
+# Agent & workflow files
+.agents
+.gemini
+
+# Node (not needed — zero-install static site)
+node_modules
+package-lock.json
+
+# Dev / archive versions
+v1.0
+v2.0
+DesignV2.json
+
+# Docs & config not needed in image
+README.md
+LICENSE
+netlify.toml
+vercel.json
+tsconfig.json
+
+# Docker files themselves
+Dockerfile
+.dockerignore
