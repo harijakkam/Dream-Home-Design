@@ -1068,39 +1068,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Modal Logic
     const backdrop = document.getElementById('modal-backdrop');
-    const modals = {
-        shortcuts: document.getElementById('modal-shortcuts'),
-        about: document.getElementById('modal-about'),
-        guide: document.getElementById('modal-guide')
-    };
-
-    let lastFocusedElement;
-    function openModal(id) {
-        lastFocusedElement = document.activeElement;
-        backdrop.classList.remove('hidden');
-        Object.values(modals).forEach(m => m.classList.add('hidden'));
-        const modal = modals[id];
-        if (modal) {
-            modal.classList.remove('hidden');
-            lucide.createIcons(); // refresh icons in content
-            
-            // Focus trap: focus first button
-            const focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (focusable.length) focusable[0].focus();
+    // --- Fix 12: Consolidate Modal Logic (Architecture) ---
+    class ModalManager {
+        constructor(backdrop, modals) {
+            this.backdrop = backdrop;
+            this.modals = modals;
+            this.lastFocusedElement = null;
+            this.isOpen = false;
+        }
+        open(id) {
+            this.lastFocusedElement = document.activeElement;
+            this.backdrop.classList.remove('hidden');
+            Object.values(this.modals).forEach(m => m?.classList.add('hidden'));
+            const modal = this.modals[id];
+            if (modal) {
+                modal.classList.remove('hidden');
+                this.isOpen = true;
+                if (window.lucide) window.lucide.createIcons();
+                const focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusable.length) focusable[0].focus();
+            }
+        }
+        close() {
+            if (!this.isOpen) return;
+            this.backdrop.classList.add('hidden');
+            this.isOpen = false;
+            if (this.lastFocusedElement) this.lastFocusedElement.focus();
         }
     }
 
-    function closeModal() {
-        backdrop.classList.add('hidden');
-        if (lastFocusedElement) lastFocusedElement.focus();
-    }
+    const modals = {
+        shortcuts: document.getElementById('modal-shortcuts'),
+        about: document.getElementById('modal-about'),
+        guide: document.getElementById('modal-guide'),
+        admin: document.getElementById('modal-admin'),
+        auth: document.getElementById('modal-auth')
+    };
 
-    document.getElementById('menu-help-shortcuts')?.addEventListener('click', () => openModal('shortcuts'));
-    document.getElementById('menu-help-about')?.addEventListener('click', () => openModal('about'));
-    document.getElementById('menu-help-guide')?.addEventListener('click', () => openModal('guide'));
+    const modalManager = new ModalManager(backdrop, modals);
 
-    document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeModal));
-    backdrop?.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+    document.getElementById('menu-help-shortcuts')?.addEventListener('click', () => modalManager.open('shortcuts'));
+    document.getElementById('menu-help-about')?.addEventListener('click', () => modalManager.open('about'));
+    document.getElementById('menu-help-guide')?.addEventListener('click', () => modalManager.open('guide'));
+
+    document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => modalManager.close()));
+    backdrop?.addEventListener('click', (e) => { if (e.target === backdrop) modalManager.close(); });
 
     document.addEventListener('keydown', (e) => {
         // --- Fix 2: Keyboard Shortcuts Fire in Input Fields ---
@@ -1108,8 +1120,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             e.target.contentEditable === 'true';
         if (isInputField) return;
 
-        if (e.key === 'Escape' && !backdrop.classList.contains('hidden')) closeModal();
-        if (e.key === 'F1') { e.preventDefault(); openModal('shortcuts'); }
+        if (e.key === 'Escape' && modalManager.isOpen) modalManager.close();
+        if (e.key === 'F1') { e.preventDefault(); modalManager.open('shortcuts'); }
     });
 
     const toggleVastuBtn = document.getElementById('toggle-vastu');
