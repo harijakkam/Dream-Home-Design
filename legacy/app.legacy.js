@@ -1464,8 +1464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================== RESIZE ====================
+    // --- Fix 5: Event Debouncing on Resize (Performance) ---
+    let resizeTimer;
     window.addEventListener('resize', () => {
-        engine.resize();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            engine.resize();
+        }, 250);
     });
 
     // ==================== SELECTION UI UPDATES ====================
