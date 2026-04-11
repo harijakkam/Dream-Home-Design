@@ -71,6 +71,26 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
       }
   };
 
+  const handleSave = () => {
+      if (!engineRef.current) return;
+      const project = {
+         v: 1.1,
+         name: 'SketchMyHome Design',
+         engine: 'NextJS',
+         scene: engineRef.current.scene
+      };
+      const jsonStr = JSON.stringify(project, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sketchmyhome_design_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+  };
+
   const fetchAdminData = async (): Promise<void> => {
      try {
        const res = await fetch('/api/admin/manage-users');
@@ -242,7 +262,7 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                    <Undo size={16} />
                 </button>
              </div>
-             <button className="action-btn primary w-full !h-10"><Save size={16} /> <span>Save</span></button>
+             <button className="action-btn primary w-full !h-10" onClick={handleSave}><Save size={16} /> <span>Save</span></button>
           </div>
         </div>
         <div className="canvas-container relative">
