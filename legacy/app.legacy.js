@@ -1549,7 +1549,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 infoDiv.innerHTML = `<strong>Selected Wall</strong><br/>Length: ${len}<br/>Angle: ${angleDeg}\u00b0`;
                 
                 if (editLengthContainer) {
-                    editLengthContainer.style.display = 'block';
+                    editLengthContainer.style.display = 'flex';
                     const lengthPx = Math.sqrt(dx * dx + dy * dy);
                     editWallLengthInput.value = (lengthPx / engine.gridSize).toFixed(1);
                 }
@@ -1559,7 +1559,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 editWallThicknessInput.value = currentInches;
                 editThicknessVal.innerText = `${currentInches}"`;
                 if (editLineTypeContainer && editWallLineType) {
-                    editLineTypeContainer.style.display = 'block';
+                    editLineTypeContainer.style.display = 'flex';
                     editWallLineType.value = item.lineType || 'solid';
                 }
                 editAltitudeContainer.style.display = 'flex';
@@ -1606,7 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 editWallThicknessInput.value = currentInches;
                 editThicknessVal.innerText = `${currentInches}"`;
                 if (editLineTypeContainer && editWallLineType) {
-                    editLineTypeContainer.style.display = 'block';
+                    editLineTypeContainer.style.display = 'flex';
                     editWallLineType.value = items[0].lineType || 'solid';
                 }
                 editAltitudeContainer.style.display = 'flex';
