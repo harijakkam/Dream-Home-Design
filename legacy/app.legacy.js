@@ -384,10 +384,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Auto-hide sidebar when using Header Bar operations
-    document.querySelectorAll('.win-menu-bar .menu-item').forEach(menu => {
-        menu.addEventListener('mouseenter', forceCollapseSidebar);
-        menu.addEventListener('click', forceCollapseSidebar);
-    });
+    // --- Fix 1: Event Delegation in Menus (Performance) ---
+    const menuBar = document.querySelector('.win-menu-bar');
+    if (menuBar) {
+        menuBar.addEventListener('click', (e) => {
+            if (e.target.closest('.menu-item')) {
+                forceCollapseSidebar();
+            }
+        });
+        menuBar.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.menu-item')) {
+                forceCollapseSidebar();
+            }
+        });
+    }
 
     // ==================== MOBILE RESPONSIVE TOOLBAR TOGGLE ====================
     // Create mobile hamburger button dynamically
