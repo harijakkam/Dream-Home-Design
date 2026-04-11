@@ -389,6 +389,65 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.addEventListener('click', forceCollapseSidebar);
     });
 
+    // ==================== MOBILE RESPONSIVE TOOLBAR TOGGLE ====================
+    // Create mobile hamburger button dynamically
+    const mobileToggle = document.createElement('button');
+    mobileToggle.className = 'mobile-toolbar-toggle';
+    mobileToggle.id = 'mobile-toolbar-toggle';
+    mobileToggle.innerHTML = '&#9776;'; // hamburger icon
+    mobileToggle.title = 'Toggle Toolbar';
+    mobileToggle.setAttribute('aria-label', 'Toggle sidebar toolbar');
+    document.body.appendChild(mobileToggle);
+
+    // Create mobile backdrop
+    const mobileBackdrop = document.createElement('div');
+    mobileBackdrop.className = 'mobile-sidebar-backdrop';
+    mobileBackdrop.id = 'mobile-sidebar-backdrop';
+    document.body.appendChild(mobileBackdrop);
+
+    function toggleMobileSidebar() {
+        if (!mainToolbar) return;
+        const isOpen = mainToolbar.classList.contains('mobile-open');
+        if (isOpen) {
+            mainToolbar.classList.remove('mobile-open');
+            mobileBackdrop.classList.remove('visible');
+            mobileToggle.innerHTML = '&#9776;';
+        } else {
+            mainToolbar.classList.add('mobile-open');
+            mainToolbar.classList.remove('collapsed');
+            mobileBackdrop.classList.add('visible');
+            mobileToggle.innerHTML = '&times;';
+        }
+    }
+
+    mobileToggle.addEventListener('click', toggleMobileSidebar);
+    mobileBackdrop.addEventListener('click', toggleMobileSidebar);
+
+    // Close mobile sidebar when a tool is selected on mobile
+    if (mainToolbar) {
+        mainToolbar.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tool-btn');
+            if (btn && window.innerWidth <= 768) {
+                setTimeout(() => {
+                    mainToolbar.classList.remove('mobile-open');
+                    mobileBackdrop.classList.remove('visible');
+                    mobileToggle.innerHTML = '&#9776;';
+                }, 150);
+            }
+        });
+    }
+
+    // Handle orientation change and resize for responsive adjustments
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            // Desktop: remove mobile classes
+            if (mainToolbar) mainToolbar.classList.remove('mobile-open');
+            mobileBackdrop.classList.remove('visible');
+            mobileToggle.innerHTML = '&#9776;';
+        }
+        engine.resize();
+    });
+
     // ==================== COLLAPSIBLE ELEMENTS ====================
     const elementsHeader = document.getElementById('elements-header');
     const elementsBody = document.getElementById('elements-body');

@@ -136,6 +136,110 @@ class CanvasEngine {
                 this.canvas.style.cursor = '';
             }
         });
+
+        // ====== Touch Support (Mobile / iPad / Tablet) ======
+        this._touchState = { fingers: 0, lastDist: 0, lastMidX: 0, lastMidY: 0 };
+
+        // Prevent page scroll/bounce when touching the canvas
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touches = e.touches;
+
+            if (touches.length === 2) {
+                // Two-finger: prepare for pinch-zoom / pan
+                const dx = touches[1].clientX - touches[0].clientX;
+                const dy = touches[1].clientY - touches[0].clientY;
+                this._touchState.lastDist = Math.sqrt(dx * dx + dy * dy);
+                this._touchState.lastMidX = (touches[0].clientX + touches[1].clientX) / 2;
+                this._touchState.lastMidY = (touches[0].clientY + touches[1].clientY) / 2;
+                this._touchState.fingers = 2;
+                this.startPan(this._touchState.lastMidX, this._touchState.lastMidY);
+            } else if (touches.length === 1) {
+                this._touchState.fingers = 1;
+                // Single finger: dispatch as mousedown for tool interaction
+                this._dispatchTouchAsMouse('mousedown', touches[0]);
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touches = e.touches;
+
+            if (touches.length === 2 && this._touchState.fingers === 2) {
+                // Pinch zoom
+                const dx = touches[1].clientX - touches[0].clientX;
+                const dy = touches[1].clientY - touches[0].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const midX = (touches[0].clientX + touches[1].clientX) / 2;
+                const midY = (touches[0].clientY + touches[1].clientY) / 2;
+
+                if (this._touchState.lastDist > 0) {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const canvasMidX = midX - rect.left;
+                    const canvasMidY = midY - rect.top;
+                    const zoomDelta = dist / this._touchState.lastDist;
+                    this.zoomAtPosition(canvasMidX, canvasMidY, this.scale * zoomDelta);
+                }
+
+                // Pan with two fingers
+                this.offsetX += midX - this._touchState.lastMidX;
+                this.offsetY += midY - this._touchState.lastMidY;
+
+                this._touchState.lastDist = dist;
+                this._touchState.lastMidX = midX;
+                this._touchState.lastMidY = midY;
+                this.render();
+            } else if (touches.length === 1 && this._touchState.fingers === 1) {
+                // Single finger: dispatch as mousemove
+                this._dispatchTouchAsMouse('mousemove', touches[0]);
+
+                // Update mouse tracking coordinates
+                const rect = this.canvas.getBoundingClientRect();
+                const clientX = touches[0].clientX - rect.left;
+                const clientY = touches[0].clientY - rect.top;
+                this.mouseX = (clientX - this.offsetX) / this.scale;
+                this.mouseY = (clientY - this.offsetY) / this.scale;
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (this._touchState.fingers === 2 && e.touches.length < 2) {
+                this.isPanning = false;
+                this.canvas.style.cursor = '';
+            }
+            if (e.touches.length === 0) {
+                if (this._touchState.fingers === 1) {
+                    // Dispatch as mouseup using the last known touch
+                    const touch = e.changedTouches[0];
+                    this._dispatchTouchAsMouse('mouseup', touch);
+                }
+                this._touchState.fingers = 0;
+                this._touchState.lastDist = 0;
+                this.isPanning = false;
+                this.canvas.style.cursor = '';
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchcancel', (e) => {
+            this._touchState.fingers = 0;
+            this._touchState.lastDist = 0;
+            this.isPanning = false;
+            this.canvas.style.cursor = '';
+        }, { passive: false });
+    }
+
+    /** Synthesize a MouseEvent from a Touch so tool handlers work on mobile */
+    _dispatchTouchAsMouse(type, touch) {
+        const mouseEvent = new MouseEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            button: 0,
+            buttons: type === 'mouseup' ? 0 : 1
+        });
+        this.canvas.dispatchEvent(mouseEvent);
     }
 
     startPan(clientX, clientY) {
