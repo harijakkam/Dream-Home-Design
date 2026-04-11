@@ -433,7 +433,7 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                   <div className="text-xs opacity-60 italic text-center py-4 bg-black/5 rounded-lg border border-dashed border-black/10">
                     Mixed selection: Bulk editing restricted.
                   </div>
-                )})}
+                )}
 
                 <div className="pt-2 border-t border-black/5 flex gap-2">
                   <button
