@@ -962,13 +962,13 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
           >
             <div className="relative w-full h-full p-2">
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-primary">N</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-white/30">S</span>
-              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/30">W</span>
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/30">E</span>
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-slate-500">S</span>
+              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500">W</span>
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-500">E</span>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-1/2 bg-gradient-to-t from-primary to-primary/40 rounded-full" />
             </div>
-            {/* Angle Bubble with Manual Input */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+            {/* Angle Bubble with Manual Input - Now at Constant Top Position */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 hover:scale-110 transition-transform z-30">
               <input 
                 type="number"
                 min="0"
@@ -978,9 +978,9 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                 className="bg-transparent border-none text-white w-7 p-0 focus:outline-none text-center font-bold"
                 onClick={(e) => e.stopPropagation()}
               />
-              <span>° North</span>
+              <span>° N</span>
             </div>
-            {/* Range slider for rotation (now limited to a smaller trigger area to prevent accidental fast spins) */}
+            {/* Range slider for rotation */}
             <div className="absolute inset-4 opacity-0 cursor-pointer">
               <input 
                 type="range" 
