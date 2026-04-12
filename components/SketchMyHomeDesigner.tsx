@@ -120,9 +120,15 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
             engineRef.current.scene = activeTab.scene || [];
             
             // Restore workspace settings if present
-            if (parsed.settings && parsed.settings.bgColor) {
-              setCanvasBgColor(parsed.settings.bgColor);
-              engineRef.current.bgColor = parsed.settings.bgColor;
+            if (parsed.settings) {
+              if (parsed.settings.bgColor) {
+                setCanvasBgColor(parsed.settings.bgColor);
+                engineRef.current.bgColor = parsed.settings.bgColor;
+              }
+              if (parsed.settings.northAngle !== undefined) {
+                setNorthAngle(parsed.settings.northAngle);
+                engineRef.current.northAngle = parsed.settings.northAngle;
+              }
             }
           }
           
@@ -148,7 +154,8 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
             name: 'SketchMyHome Active Session',
             activeDesignIndex: activeIdx !== -1 ? activeIdx : 0,
             settings: {
-              bgColor: canvasBgColorRef.current
+              bgColor: canvasBgColorRef.current,
+              northAngle: engine.northAngle || 0
             },
             designs: currentTabs
           });
@@ -235,7 +242,8 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
       projectName: 'SketchMyHome Design',
       activeDesignIndex: activeIdx !== -1 ? activeIdx : 0,
       settings: {
-        bgColor: canvasBgColor
+        bgColor: canvasBgColor,
+        northAngle: engine.northAngle || 0
       },
       designs: currentTabs
     };
@@ -469,9 +477,15 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
           engine.scene = activeTab.scene;
           
           // Restore workspace settings
-          if (data.settings && data.settings.bgColor) {
-            setCanvasBgColor(data.settings.bgColor);
-            engine.bgColor = data.settings.bgColor;
+          if (data.settings) {
+            if (data.settings.bgColor) {
+              setCanvasBgColor(data.settings.bgColor);
+              engine.bgColor = data.settings.bgColor;
+            }
+            if (data.settings.northAngle !== undefined) {
+              setNorthAngle(data.settings.northAngle);
+              engine.northAngle = data.settings.northAngle;
+            }
           }
         } else if (data.scene) {
           // Wrap single scene legacy files
@@ -527,10 +541,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const handleUpdateNorthAngle = (angle: number) => {
+    // Clamp angle to 0-359
+    const normalized = ((angle % 360) + 360) % 360;
     const engine = engineRef.current;
     if (!engine) return;
-    setNorthAngle(angle);
-    engine.northAngle = angle;
+    setNorthAngle(normalized);
+    engine.northAngle = normalized;
     engine.render();
   };
 
@@ -946,23 +962,35 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
           >
             <div className="relative w-full h-full p-2">
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-primary">N</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-black/30">S</span>
-              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-black/30">W</span>
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-black/30">E</span>
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-white/30">S</span>
+              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/30">W</span>
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/30">E</span>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-1/2 bg-gradient-to-t from-primary to-primary/40 rounded-full" />
             </div>
-            {/* Angle Bubble */}
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              {northAngle}° North
+            {/* Angle Bubble with Manual Input */}
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+              <input 
+                type="number"
+                min="0"
+                max="359"
+                value={Math.round(northAngle)}
+                onChange={(e) => handleUpdateNorthAngle(parseInt(e.target.value) || 0)}
+                className="bg-transparent border-none text-white w-7 p-0 focus:outline-none text-center font-bold"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <span>° North</span>
             </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="359" 
-              value={northAngle} 
-              onChange={(e) => handleUpdateNorthAngle(parseInt(e.target.value))}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
+            {/* Range slider for rotation (now limited to a smaller trigger area to prevent accidental fast spins) */}
+            <div className="absolute inset-4 opacity-0 cursor-pointer">
+              <input 
+                type="range" 
+                min="0" 
+                max="359" 
+                value={northAngle} 
+                onChange={(e) => handleUpdateNorthAngle(parseInt(e.target.value))}
+                className="w-full h-full cursor-pointer"
+              />
+            </div>
           </div>
 
           {/* Properties Panel (Integrated into Canvas space) */}
