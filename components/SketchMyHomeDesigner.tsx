@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import { CanvasEngine } from '@/lib/sketch-my-home/engine';
 import { createClient } from '@/utils/supabase/client';
-import { Layout, Hammer, Square, Trash2, Undo, Save, User, LogIn, MousePointer, Hand, DoorOpen, AppWindow, AlignJustify, Bed, Circle, Library, Bath, Droplets, Armchair, Type, Maximize2, Minus, Plus, Maximize } from 'lucide-react';
+import { Layout, Hammer, Square, Trash2, Undo, Save, User, LogIn, MousePointer, Hand, DoorOpen, AppWindow, AlignJustify, Bed, Circle, Library, Bath, Droplets, Armchair, Type, Maximize2, Minus, Plus, Maximize, Ruler } from 'lucide-react';
 // @ts-ignore
 import { ToolsManager } from '@/lib/sketch-my-home/tools';
 import { SketchMyHomeCrypto } from '@/lib/sketch-my-home/crypto';
@@ -195,6 +195,9 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (toolsRef.current) toolsRef.current.setTool('delete');
+      }
+      if (e.key.toLowerCase() === 'm') {
+        handleToolClick('measure');
       }
     };
 
@@ -876,6 +879,8 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
                 <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Select Tool</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">S</kbd></div>
                 <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Wall Tool</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">W</kbd></div>
                 <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Pan Tool</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">P</kbd></div>
+                <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Length Tool</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">M</kbd></div>
+                <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Area Tool</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">A</kbd></div>
                 <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Delete Item</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">Del</kbd></div>
                 <div className="flex justify-between py-2 border-b border-white/5"><span className="text-sm">Undo Action</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">Ctrl+Z</kbd></div>
                 <div className="flex justify-between py-2"><span className="text-sm">Help Guide</span><kbd className="bg-white/10 px-2 rounded font-mono text-xs">F1</kbd></div>
@@ -902,9 +907,14 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
             <button className={`tool-btn ${activeTool === 'room' ? 'active' : ''}`} onClick={() => handleToolClick('room')}>
               <Layout size={20} /> <span>Room</span>
             </button>
-            <button className={`tool-btn ${activeTool === 'measure_area' ? 'active' : ''}`} onClick={() => handleToolClick('measure_area')}>
-              <Maximize2 size={20} /> <span>Area</span>
-            </button>
+            <div className="flex gap-2 w-full">
+              <button className={`tool-btn flex-1 ${activeTool === 'measure' ? 'active' : ''}`} onClick={() => handleToolClick('measure')} title="Length Measurement (M)">
+                <Ruler size={20} /> <span className="text-[10px]">Length</span>
+              </button>
+              <button className={`tool-btn flex-1 ${activeTool === 'measure_area' ? 'active' : ''}`} onClick={() => handleToolClick('measure_area')} title="Area Measurement (A)">
+                <Maximize2 size={20} /> <span className="text-[10px]">Area</span>
+              </button>
+            </div>
 
             <h3 className="text-xs uppercase text-black/50 mt-4 mb-2 px-2 tracking-widest font-bold border-t border-black/10 pt-4">Elements</h3>
             <div className="grid grid-cols-2 gap-2">
