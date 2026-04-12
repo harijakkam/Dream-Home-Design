@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="sketch my home — Professional zero-install 2D architectural floor plan designer with Vastu grid support.">
+    <meta name="theme-color" content="#121214">
+    <title>sketch my home</title>
+    <link rel="icon" type="image/jpeg" href="logo.png">
+    <link rel="stylesheet" href="style.css?v=2.2.5">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="theme-dark">
+    <div class="main-wrapper">
+        <nav class="win-menu-bar">
+            <!-- File Menu -->
+            <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">File
+                <div class="dropdown-menu" role="menu">
+                    <div class="dropdown-item" onclick="document.getElementById('tab-add').click();">
+                        <span>New Design</span><span class="menu-shortcut">Ctrl+N</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="document.getElementById('save-json-btn').click();">
+                        <span>Save Project</span><span class="menu-shortcut">Ctrl+S</span>
+                    </div>
+                    <div class="dropdown-item" style="position:relative;cursor:pointer;">
+                        <span>Open Project</span><span class="menu-shortcut">Ctrl+O</span>
+                        <input type="file" id="load-json-input" accept=".json,.rproj"
+                            style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;">
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="document.getElementById('export-btn').click();">
+                        <span>Export as PNG</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Menu -->
+            <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">Edit
+                <div class="dropdown-menu" role="menu">
+                    <div class="dropdown-item" onclick="document.getElementById('undo-btn').click();">
+                        <span>Undo</span><span class="menu-shortcut">Ctrl+Z</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item"
+                        onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: 'c', ctrlKey: true}));">
+                        <span>Copy</span><span class="menu-shortcut">Ctrl+C</span>
+                    </div>
+                    <div class="dropdown-item"
+                        onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: 'v', ctrlKey: true}));">
+                        <span>Paste</span><span class="menu-shortcut">Ctrl+V</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" role="menuitem" onclick="document.getElementById('clear-btn').click();">
+                        <span>Clear All</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Menu -->
+            <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">View
+                <div class="dropdown-menu" role="menu">
+                    <div class="dropdown-item" id="menu-toggle-grid">
+                        <span>Grid Lines</span><span class="menu-shortcut">Toggle</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-toggle-vastu">
+                        <span>Vastu Overlay</span><span class="menu-shortcut">Toggle</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-toggle-guide">
+                        <span>Alignment Guides</span><span class="menu-shortcut">Toggle</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="menu-zoom-reset">
+                        <span>Zoom to Fit</span><span class="menu-shortcut">Reset</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="menu-toggle-json">
+                        <span>Live Editor</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-toggle-props">
+                        <span>Properties Panel</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Menu -->
+            <div class="menu-item" role="menuitem" aria-haspopup="true" aria-expanded="false">Settings
+                <div class="dropdown-menu" role="menu">
+                    <div class="dropdown-item" id="menu-theme-toggle">
+                        <span>Appearance</span><span id="theme-status" style="font-size:11px;opacity:0.7;">Dark</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-toggle-sticky">
+                        <span>Sticky Wall Joins</span><span class="menu-shortcut">Active</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" style="cursor:default;">
+                        <span>Auto-Encrypt Saves</span><span
+                            style="color:var(--primary);font-size:10px;font-weight:700;">ON</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cloud Menu -->
+            <div class="menu-item">Cloud
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" id="menu-cloud-projects">
+                        <span>My Projects</span><span class="menu-shortcut">Saved Designs</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-cloud-sync">
+                        <span>Sync Current</span><span class="menu-shortcut">Cloud Save</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-admin-panel">
+                        <span style="color:var(--primary); font-weight:700;">Admin Dashboard</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="menu-auth-btn">
+                        <span id="auth-btn-text">Sign In</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Menu -->
+            <div class="menu-item">Help
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" id="menu-help-shortcuts">
+                        <span>Keyboard Shortcuts</span><span class="menu-shortcut">F1</span>
+                    </div>
+                    <div class="dropdown-item" id="menu-help-guide">
+                        <span>User Guide</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="menu-help-about">
+                        <span>About Designer</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="flex:1;"></div>
+            <div id="sync-status"
+                style="font-size:10px; color:var(--text-muted); opacity:0.6; margin-right:16px; font-weight:500;">Local
+                Mode</div>
+            <div
+                style="padding-right:12px; font-weight:700; font-size:12px; color:var(--primary); letter-spacing:0.5px;">
+                SKETCH MY HOME</div>
+        </nav>
+
+        <div class="app-container">
+            <!-- Sidebar Toolbar -->
+            <aside class="toolbar" id="main-toolbar">
+                <div class="brand">
+                    <input type="text" id="project-name" value="My Home" placeholder="Project Name"
+                        style="background:transparent;border:none;border-bottom:1px solid var(--border-light);color:var(--text-main);font-size:18px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:-0.5px;outline:none;width:100%;padding:2px 0;"
+                        title="Click to rename project">
+                    <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse Sidebar">
+                        <i data-lucide="panel-left-close" style="width:16px;height:16px;"></i>
+                    </button>
+                </div>
+
+                <div class="tools-group">
+                    <h3>Tools</h3>
+                    <button class="tool-btn active" data-tool="select" title="Select Tool">
+                        <i data-lucide="mouse-pointer-2"></i> Select
+                    </button>
+                    <button class="tool-btn" data-tool="pan" title="Pan Canvas">
+                        <i data-lucide="hand"></i> Pan
+                    </button>
+                    <button class="tool-btn" data-tool="wall" title="Draw Wall">
+                        <i data-lucide="pen-tool"></i> Wall
+                    </button>
+                    <button class="tool-btn" data-tool="room" title="Draw Room">
+                        <i data-lucide="square"></i> Room
+                    </button>
+                    <button class="tool-btn" data-tool="measure_area" title="Measure Area">
+                        <i data-lucide="maximize-2"></i> Area
+                    </button>
+                    <div style="height: 1px; background: var(--border-light); margin: 8px 0;"></div>
+
+                    <!-- Collapsible Elements Section -->
+                    <div class="elements-header" id="elements-header">
+                        <span>Elements</span>
+                        <i data-lucide="chevron-down" class="elements-chevron" id="elements-chevron"
+                            style="width:14px;height:14px;"></i>
+                    </div>
+                    <div class="elements-body" id="elements-body">
+                        <button class="tool-btn" data-tool="door" title="Add Door">
+                            <i data-lucide="door-open"></i> Door
+                        </button>
+                        <button class="tool-btn" data-tool="window" title="Add Window">
+                            <i data-lucide="app-window"></i> Window
+                        </button>
+                        <button class="tool-btn" data-tool="stairs" title="Add Stairs">
+                            <i data-lucide="align-justify"></i> Stairs
+                        </button>
+                        <button class="tool-btn" data-tool="bed" title="Add Bed">
+                            <i data-lucide="bed"></i> Bed
+                        </button>
+                        <button class="tool-btn" data-tool="table" title="Add Table">
+                            <i data-lucide="circle"></i> Table
+                        </button>
+                        <button class="tool-btn" data-tool="bookshelf" title="Add Bookshelf">
+                            <i data-lucide="library"></i> Bookshelf
+                        </button>
+                        <button class="tool-btn" data-tool="commode" title="Add Commode">
+                            <i data-lucide="bath"></i> Commode
+                        </button>
+                        <button class="tool-btn" data-tool="washing_machine" title="Add Washer">
+                            <i data-lucide="droplets"></i> Washer
+                        </button>
+                        <button class="tool-btn" data-tool="chair" title="Add Chair">
+                            <i data-lucide="armchair"></i> Chair
+                        </button>
+                        <button class="tool-btn" data-tool="sofa" title="Add Sofa">
+                            <i data-lucide="layout"></i> Sofa
+                        </button>
+                        <button class="tool-btn" data-tool="text" title="Add Text Label">
+                            <i data-lucide="type"></i> Text
+                        </button>
+                    </div>
+
+                    <button class="tool-btn" data-tool="delete" title="Delete Selected">
+                        <i data-lucide="trash-2"></i> Delete
+                    </button>
+                </div>
+
+                <div class="tools-group">
+                    <h3>Advanced Settings</h3>
+                    <div class="setting-item">
+                        <label for="north-angle">Select Direction</label>
+                        <div class="slider-container">
+                            <input type="range" id="north-angle" min="0" max="359" value="0">
+                            <span id="north-angle-val">0°</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="wall-thickness">Default Wall Thickness</label>
+                        <div class="slider-container">
+                            <input type="range" id="wall-thickness" min="4" max="24" value="9">
+                            <span id="wall-thickness-val">9"</span>
+                        </div>
+                    </div>
+                    <label for="bg-color" style="margin-top: 12px; display: block;">Background Color</label>
+                    <input type="color" id="bg-color" value="#1e1e22"
+                        style="width: 100%; height: 32px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; margin-top: 4px;">
+
+                    <input type="checkbox" id="encrypt-toggle" checked disabled style="display:none;">
+                </div>
+
+                <div class="toolbar-section">
+                    <button class="action-btn" id="undo-btn" title="Undo (Ctrl+Z)">
+                        <i data-lucide="undo-2"></i> Undo
+                    </button>
+                    <button class="action-btn" id="save-json-btn" style="display:none;"></button>
+                    <button class="action-btn" id="export-btn" style="display:none;"></button>
+                    <button class="action-btn" id="toggle-json-sidebar" style="display:none;"></button>
+                    <button class="action-btn" id="toggle-properties-sidebar" style="display:none;"></button>
+                    <button class="action-btn" id="clear-btn" style="display:none;"></button>
+                </div>
+            </aside>
+
+            <main class="canvas-container">
+                <!-- Floating Sidebar Toggle (visible only when collapsed) -->
+                <button class="sidebar-toggle-btn hidden" id="sidebar-toggle-btn" title="Expand Sidebar">
+                    <i data-lucide="panel-left-open" style="width:18px;height:18px;"></i>
+                </button>
+
+                <!-- Tab Bar -->
+                <div class="tab-bar" id="tab-bar">
+                    <div class="tab-list" id="tab-list">
+                        <div class="tab active" data-tab-id="0">
+                            <span class="tab-name">Design 1</span>
+                            <button class="tab-close" title="Close tab">&times;</button>
+                        </div>
+                    </div>
+                    <button class="tab-add" id="tab-add" title="New Design"><i data-lucide="plus"
+                            style="width:14px;height:14px;"></i></button>
+                </div>
+
+                <!-- Rich Compass Widget -->
+                <div class="compass-widget" id="compass-widget">
+                    <div class="compass-inner">
+                        <div class="compass-labels" id="compass-labels"
+                            style="position: absolute; width: 100%; height: 100%;">
+                            <span class="lbl-n"
+                                style="position: absolute;top: 6px;left: calc(50% - 10px);color: var(--primary);font-weight: 800;width: 20px;text-align: center;">N</span>
+                            <span class="lbl-e"
+                                style="position: absolute;right: 6px;top: calc(50% - 5px);color: var(--text-muted);font-weight: 800;width: 20px;text-align: center;">E</span>
+                            <span class="lbl-s"
+                                style="position: absolute;bottom: 6px;left: calc(50% - 10px);color: var(--text-muted);font-weight: 800;width: 20px;text-align: center;">S</span>
+                            <span class="lbl-w"
+                                style="position: absolute;left: 6px;top: calc(50% - 5px);color: var(--text-muted);font-weight: 800;width: 20px;text-align: center;">W</span>
+                        </div>
+                        <div class="compass-needle" id="compass-needle"
+                            style="position: absolute;top: 50%;left: 50%;width: 3px;height: 50%;transform-origin: center;transform: translate(-50%, -50%) rotate(-90deg);pointer-events: none;">
+                            <div class="needle-north"
+                                style="width: 100%;height: 50%;background: linear-gradient(to top, #6366f1, #818cf8);border-radius: 4px 4px 0 0;">
+                            </div>
+                            <div class="needle-south"
+                                style="width: 100%;height: 50%;background: #475569;border-radius: 0 0 4px 4px;"></div>
+                        </div>
+                    </div>
+                    <div class="compass-angle-bubble" id="compass-angle-bubble">0°</div>
+                </div>
+
+                <canvas id="design-canvas"></canvas>
+
+                <div class="properties-panel" id="properties-panel">
+                    <div class="properties-header" id="properties-header">
+                        <h3>Properties</h3>
+                        <div style="display:flex;gap:4px;">
+                            <button class="prop-minimize-btn" id="prop-minimize-btn" title="Minimize">
+                                <i data-lucide="minus" style="width:14px;height:14px;"></i>
+                            </button>
+                            <button class="prop-close-btn" id="prop-close-btn" title="Close"
+                                style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="x" style="width:14px;height:14px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="properties-body" id="properties-body">
+                        <div id="selection-info">No item selected.</div>
+                        <div id="item-properties" style="display: none; margin-top: 12px;">
+                            <div class="setting-item" id="edit-length-container"
+                                style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                                <label>Wall Length (ft)</label>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                    <input type="number" id="edit-wall-length" step="0.1" min="0.1"
+                                        style="flex: 1; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-main); padding: 6px; outline: none;">
+                                    <span style="font-size: 11px; opacity: 0.6;">ft</span>
+                                </div>
+                            </div>
+                            <div class="setting-item" id="edit-thickness-container"
+                                style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                                <label>Edit Thickness</label>
+                                <div class="slider-container">
+                                    <input type="range" id="edit-wall-thickness" min="1" max="36" value="9">
+                                    <span id="edit-thickness-val">9"</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-item" id="edit-line-type-container"
+                                style="display: none; margin-top: 12px; padding-top: 4px;">
+                                <label>Line Type</label>
+                                <select id="edit-wall-line-type"
+                                    style="width: 100%; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-main); padding: 6px; margin-top: 4px;">
+                                    <option value="solid">Solid</option>
+                                    <option value="dotted">Dotted</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item" id="edit-altitude-container"
+                                style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                                <label>Wall Altitude (Height)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="edit-wall-altitude" min="1" max="30" value="8" step="0.5">
+                                    <span id="edit-altitude-val">8ft</span>
+                                </div>
+                            </div>
+
+                            <!-- Text edit container (shown for text objects) -->
+                            <div class="setting-item" id="edit-text-container"
+                                style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                                <label>Text Content</label>
+                                <input type="text" id="edit-text-content" placeholder="Enter text..."
+                                    style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border-color);background:rgba(0,0,0,0.2);color:var(--text-main);font-family:inherit;font-size:13px;outline:none;">
+                                <label style="margin-top:8px;">Font Size</label>
+                                <div class="slider-container">
+                                    <input type="range" id="edit-text-size" min="8" max="72" value="16">
+                                    <span id="edit-text-size-val">16px</span>
+                                </div>
+                            </div>
+
+                            <div class="setting-item" id="rotate-container"
+                                style="display: none; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                                <button id="rotate-btn"
+                                    style="background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; width: 100%;">
+                                    <i data-lucide="rotate-cw" style="width: 16px; height: 16px;"></i> Rotate 90&deg;
+                                </button>
+                                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <button id="flip-h-btn"
+                                        style="flex: 1; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-family: 'Inter', sans-serif;">
+                                        <i data-lucide="split-square-horizontal" style="width: 14px; height: 14px;"></i>
+                                        Flip H
+                                    </button>
+                                    <button id="flip-v-btn"
+                                        style="flex: 1; background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-family: 'Inter', sans-serif;">
+                                        <i data-lucide="split-square-vertical" style="width: 14px; height: 14px;"></i>
+                                        Flip
+                                        V
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size: 11px; margin-top: 24px; color: #94a3b8; line-height: 1.5;">
+                            Select tool allows moving objects with drag and drop. Hit 'Delete' or 'Backspace' to remove
+                            selected
+                            items. Scroll to zoom and middle-click (or alt-click) to pan.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="zoom-controls"
+                    style="position: absolute; bottom: 24px; right: 24px; display: flex; gap: 4px; background: var(--panel-bg); padding: 6px; border-radius: 8px; border: 1px solid var(--border-light); z-index: 10;">
+                    <button class="tool-btn" id="zoom-out" title="Zoom Out" style="padding: 8px;"><i data-lucide="minus"
+                            style="width: 16px; height: 16px;"></i></button>
+                    <input id="zoom-val" type="text" value="100%"
+                        style="width: 50px; background: transparent; border: none; font-size: 12px; font-weight: 500; font-family: monospace; text-align: center; color: var(--text-main); outline: none; padding: 2px 0;">
+                    <button class="tool-btn" id="zoom-in" title="Zoom In" style="padding: 8px;"><i data-lucide="plus"
+                            style="width: 16px; height: 16px;"></i></button>
+                    <button class="tool-btn" id="zoom-reset" title="Reset View" style="padding: 8px;"><i
+                            data-lucide="maximize" style="width: 16px; height: 16px;"></i></button>
+                </div>
+            </main>
+
+            <!-- Floating Live Editor Window -->
+            <div class="floating-editor hidden" id="json-sidebar">
+                <div class="floating-editor-titlebar" id="floating-editor-titlebar">
+                    <h3>Live JSON Editor</h3>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span id="json-status" class="status-badge success">Valid</span>
+                        <button class="floating-editor-close" id="floating-editor-close" title="Close">&times;</button>
+                    </div>
+                </div>
+                <textarea id="json-editor" class="code-editor" spellcheck="false" placeholder="[]"></textarea>
+                <div class="floating-editor-resize" id="floating-editor-resize"></div>
+            </div>
+        </div>
+
+        <!-- Always-Visible Logo Overlay (Bottom-Right, above Zoom Panel) -->
+        <div id="app-logo-overlay" class="app-logo-overlay"
+            style="position:fixed; bottom:120px; right:24px; z-index:5000; pointer-events:none; transition: all 0.3s ease;">
+            <img src="logo.png" alt="Logo"
+                style="width:88px; height:88px; border-radius:20px; background:white; padding:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); object-fit:contain;">
+        </div>
+
+        <!-- Documentation Modals -->
+        <div id="modal-backdrop" class="modal-backdrop hidden">
+            <!-- Shortcuts Modal -->
+            <div id="modal-shortcuts" class="modal hidden">
+                <div class="modal-header">
+                    <h3><i data-lucide="keyboard"></i> Keyboard Shortcuts</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <table class="shortcuts-table">
+                        <tr>
+                            <td><kbd>Ctrl</kbd> + <kbd>S</kbd></td>
+                            <td>Save Project</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl</kbd> + <kbd>O</kbd></td>
+                            <td>Open Project</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+                            <td>Undo</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>V</kbd></td>
+                            <td>Copy / Paste</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Del</kbd> / <kbd>Backspace</kbd></td>
+                            <td>Delete Selected</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>A</kbd></td>
+                            <td>Area Measurement Tool</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Esc</kbd></td>
+                            <td>Cancel Drawing / Clear Selection</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Space</kbd> + <kbd>Drag</kbd></td>
+                            <td>Pan Canvas</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Scroll</kbd></td>
+                            <td>Zoom In / Out</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- User Guide Modal -->
+            <div id="modal-guide" class="modal hidden">
+                <div class="modal-header">
+                    <h3><i data-lucide="book-open"></i> User Guide</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <section>
+                        <h4>1. Designing Walls & Rooms</h4>
+                        <p>Use the <b>Wall</b> tool to draw custom wall segments. Use the <b>Room</b> tool for quick
+                            rectangular enclosures. Walls will automatically snap to each other when "Sticky" mode is
+                            enabled.</p>
+                    </section>
+                    <section>
+                        <h4>2. Adding Elements</h4>
+                        <p>Expand the <b>Elements</b> section in the sidebar to add doors, windows, and furniture. Once
+                            placed, use the <b>Select</b> tool to move or resize them.</p>
+                    </section>
+                    <section>
+                        <h4>3. Precision Tools</h4>
+                        <p>Enable <b>Grid</b> or <b>Vastu</b> from the <i>View</i> menu for better alignment. Use the
+                            <b>Guide</b> tool to show alignment crosshairs for pixel-perfect placement.
+                        </p>
+                    </section>
+                    <section>
+                        <h4>4. Exporting</h4>
+                        <p>When your design is complete, use <i>File > Export as PNG</i> to save a high-resolution
+                            top-down image of your floor plan.</p>
+                    </section>
+                </div>
+            </div>
+
+            <!-- About Modal -->
+            <div id="modal-about" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-about-title">
+                <div class="modal-header">
+                    <h3 id="modal-about-title"><i data-lucide="info"></i> About Designer</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    <img src="logo.png" alt="Sketch My Home Logo"
+                        style="width: 60px; height: 60px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); margin-bottom: 24px; object-fit: contain; border: 2px solid var(--primary); background: white; padding: 8px;">
+                    <h2>sketch my home</h2>
+                    <p style="opacity: 0.4; margin-bottom: 24px;">Professional 2D Floor Plan Solution</p>
+                    <p>Version 2.2.4 (Enterprise Edition)</p>
+                    <p style="margin-top: 12px; font-size: 13px;">Built with Vanilla JS & HTML5 Canvas.<br>Secure AES
+                        Encrypted Save System Enabled.</p>
+                    <div class="dropdown-divider" style="margin: 20px 0;"></div>
+                    <p style="font-size: 11px; opacity: 0.5;">&copy; 2026 ProSaral Solutions. All rights reserved.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard Modal -->
+            <div id="modal-admin" class="modal hidden" style="width: 800px; max-width: 95%;" role="dialog" aria-modal="true" aria-labelledby="modal-admin-title">
+                <div class="modal-header">
+                    <h3 id="modal-admin-title"><i data-lucide="shield" style="width:18px;height:18px;margin-right:8px;"></i> Admin Dashboard
+                    </h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="admin-stats"
+                        style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:24px;">
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                            <div style="font-size:12px; color:var(--text-muted);">Total Users</div>
+                            <div id="admin-total-users" style="font-size:24px; font-weight:700; color:var(--primary);">
+                                312</div>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                            <div style="font-size:12px; color:var(--text-muted);">Total Designs</div>
+                            <div id="admin-total-designs" style="font-size:24px; font-weight:700; color:#a855f7;">1,542
+                            </div>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.05); padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                            <div style="font-size:12px; color:var(--text-muted);">Platform Health</div>
+                            <div id="admin-status" style="font-size:24px; font-weight:700; color:#22c55e;">OPR</div>
+                        </div>
+                    </div>
+
+                    <h4>User Access Management</h4>
+                    <div
+                        style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 8px;">
+                        <table style="width:100%; border-collapse: collapse; font-size:13px; text-align: left;">
+                            <thead style="background:rgba(0,0,0,0.2); color:var(--text-muted);">
+                                <tr>
+                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">User Email
+                                    </th>
+                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">Role</th>
+                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">Status</th>
+                                    <th style="padding:12px; border-bottom:1px solid var(--border-light);">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list">
+                                <!-- Users will be dynamically loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication Modal (Sign In / Up) -->
+            <div id="modal-auth" class="modal hidden" style="width: 420px; overflow:visible;">
+                <div class="modal-header" style="justify-content: center; border-bottom:none; padding-top:32px;">
+                    <div style="text-align: center;">
+                        <h2 id="auth-title"
+                            style="font-size:24px; font-weight:800; margin-bottom:8px; color:var(--primary);">Welcome
+                            Back</h2>
+                        <p id="auth-subtitle" style="font-size:13px; color:var(--text-muted);">Continue your
+                            architectural journey</p>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding: 0 32px 32px 32px;">
+                    <form id="auth-form" style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="form-group">
+                            <label for="auth-email"
+                                style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Email
+                                Address</label>
+                            <input type="email" id="auth-email" placeholder="name@company.com" required
+                                style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid var(--border-light); border-radius:8px; color:var(--text-main); font-family:inherit; outline:none; transition: border-color 0.2s;">
+                        </div>
+                        <div class="form-group" style="position:relative;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label for="auth-password"
+                                    style="font-size:12px; font-weight:600; color:var(--text-muted);">Password</label>
+                                <a href="#" id="auth-forgot"
+                                    style="font-size:11px; color:var(--primary); text-decoration:none;">Forgot?</a>
+                            </div>
+                            <div style="position:relative; width:100%;">
+                                <input type="password" id="auth-password" placeholder="••••••••" required
+                                    style="width:100%; padding:12px; padding-right:40px; background:rgba(255,255,255,0.05); border:1px solid var(--border-light); border-radius:8px; color:var(--text-main); font-family:inherit; outline:none; transition: border-color 0.2s;">
+                                <button type="button" id="auth-toggle-pass"
+                                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0; height:auto; width:auto;">
+                                    <i data-lucide="eye" style="width:16px; height:16px;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="coupon-group">
+                            <label for="auth-coupon"
+                                style="display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--text-muted);">Coupon Code</label>
+                            <input type="text" id="auth-coupon" placeholder="Enter valid coupon code" required
+                                style="width:100%; padding:12px; background:rgba(255,255,255,0.05); border:1px solid var(--border-light); border-radius:8px; color:var(--text-main); font-family:inherit; outline:none; transition: border-color 0.2s;">
+                        </div>
+
+                        <div id="auth-error" class="hidden"
+                            style="background:rgba(239, 68, 68, 0.1); border:1px solid var(--danger); color:var(--danger); padding:10px; border-radius:6px; font-size:12px; text-align:center;">
+                            Invalid email or password. Please try again.
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="auth-remember"
+                                style="width:14px; height:14px; accent-color:var(--primary);">
+                            <label for="auth-remember"
+                                style="font-size:12px; color:var(--text-muted); cursor:pointer;">Keep me signed
+                                in</label>
+                        </div>
+
+                        <button type="submit" id="auth-submit-btn" class="action-btn primary"
+                            style="padding:14px; font-weight:700; margin-top:8px; display:flex; justify-content:center; align-items:center; gap:10px;">
+                            <span id="auth-submit-text">Sign In</span>
+                            <div id="auth-spinner" class="spinner hidden"
+                                style="width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation: spin 0.8s linear infinite;">
+                            </div>
+                        </button>
+
+                        <div style="display:flex; align-items:center; gap:12px; margin:8px 0;">
+                            <div style="flex:1; height:1px; background:var(--border-light);"></div>
+                            <span
+                                style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">or
+                                continue with</span>
+                            <div style="flex:1; height:1px; background:var(--border-light);"></div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <button type="button" class="action-btn"
+                                style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
+                                <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+                                    style="width:16px; height:16px; filter:grayscale(1) brightness(1.5);"> Google
+                            </button>
+                            <button type="button" class="action-btn"
+                                style="padding:10px; display:flex; justify-content:center; align-items:center; gap:8px; font-size:13px; background:rgba(255,255,255,0.03); border:1px solid var(--border-light);">
+                                <i data-lucide="github" style="width:16px; height:16px;"></i> GitHub
+                            </button>
+                        </div>
+                    </form>
+
+                    <div style="text-align:center; margin-top:24px; font-size:13px; color:var(--text-muted);">
+                        <span id="auth-switch-text">Don't have an account?</span>
+                        <a href="#" id="auth-switch-btn"
+                            style="color:var(--primary); font-weight:700; text-decoration:none; margin-left:4px;">Sign
+                            Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core modules (load order matters) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+        <script src="event-bus.js?v=2.2.5"></script>
+        <script src="elements.js?v=2.2.5"></script>
+        <script src="crypto.js?v=2.2.5"></script>
+        <script src="branding-assets.js?v=2.2.5"></script>
+        <script src="canvas-engine.js?v=2.2.5"></script>
+        <script src="tools.js?v=2.2.5"></script>
+        <script src="auth.js?v=2.2.5"></script>
+        <script src="api-client.js?v=2.2.5"></script>
+        <script src="app.js?v=2.2.5"></script>
+        <script>
+            lucide.createIcons();
+        </script>
+        <!-- Vercel Analytics -->
+        <script defer src="/_vercel/insights/script.js"></script>
+</body>
+
+</html>

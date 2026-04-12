@@ -1,0 +1,1480 @@
+:root {
+    /* UI System Tokens */
+    --win-menu-bg: #f3f3f3;
+    --win-menu-text: #333;
+    --win-menu-hover: #e5e5e5;
+    --win-menu-active: #d5d5d5;
+    --win-border: #ccc;
+
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --danger: #ef4444;
+
+    /* Default is Dark (matches previous design) */
+    --bg-dark: #121214;
+    --bg-canvas: #1e1e22;
+    --panel-bg: rgba(30, 30, 34, 0.9);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --border-light: rgba(255, 255, 255, 0.1);
+}
+
+.theme-light {
+    --bg-dark: #f8fafc;
+    --bg-canvas: #ffffff;
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-light: rgba(15, 23, 42, 0.1);
+
+    --win-menu-bg: #ffffff;
+    --win-menu-text: #1e293b;
+    --win-menu-hover: #f1f5f9;
+    --win-menu-active: #e2e8f0;
+}
+
+.theme-dark {
+    --bg-dark: #121214;
+    --bg-canvas: #1e1e22;
+    --panel-bg: rgba(30, 30, 34, 0.95);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --border-light: rgba(255, 255, 255, 0.1);
+
+    --win-menu-bg: #1e1e22;
+    --win-menu-text: #f8fafc;
+    --win-menu-hover: #334155;
+    --win-menu-active: #475569;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+.app-container {
+    display: flex;
+    flex: 1;
+    width: 100vw;
+    height: calc(100vh - 32px);
+    /* Correctly fill viewport below menu */
+    overflow: hidden;
+    position: relative;
+    /* Container for absolute children */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color);
+}
+
+/* Rich Movable Compass Widget */
+.compass-widget {
+    position: absolute;
+    top: 100px;
+    right: 40px;
+    width: 100px;
+    height: 100px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+    user-select: none;
+    transition: transform 0.2s;
+}
+
+.compass-widget:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.compass-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.compass-angle-bubble {
+    position: absolute;
+    top: -24px;
+    background: var(--primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.compass-widget:hover .compass-angle-bubble {
+    opacity: 1;
+}
+
+/* Windows Style Menu Bar */
+.win-menu-bar {
+    height: 32px;
+    background-color: var(--win-menu-bg);
+    color: var(--win-menu-text);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--win-border);
+    z-index: 3000;
+    /* Priority top-most */
+    user-select: none;
+}
+
+.menu-item {
+    padding: 0 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    cursor: default;
+    position: relative;
+}
+
+.menu-item:hover, .menu-item:focus {
+    background-color: var(--win-menu-hover);
+    outline: none;
+}
+.menu-item:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.menu-item:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 32px;
+    left: 0;
+    background-color: var(--win-menu-bg);
+    border: 1px solid var(--win-border);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+}
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dropdown-item:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--win-border);
+    margin: 4px 0;
+}
+
+.menu-shortcut {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-left: 20px;
+}
+
+/* Sidebar Toolbar Overlay */
+.toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100%;
+    background-color: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    padding-top: 50px;
+    /* Room for collapse button at top */
+    gap: 24px;
+    z-index: 1000;
+    /* High priority overlay */
+    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+}
+
+.toolbar.collapsed {
+    width: 0;
+    padding: 16px 0;
+    opacity: 0;
+    pointer-events: none;
+    border-right: none;
+}
+
+.toolbar.collapsed .brand input,
+.toolbar.collapsed h3,
+.toolbar.collapsed .tool-btn span,
+.toolbar.collapsed .action-btn span,
+.toolbar.collapsed .setting-item {
+    display: none;
+}
+
+.toolbar.collapsed .brand {
+    justify-content: center;
+    padding-bottom: 12px;
+}
+
+.toolbar.collapsed .brand i {
+    display: none;
+}
+
+.toolbar.collapsed .brand .sidebar-collapse-btn {
+    margin-left: 0;
+}
+
+.toolbar.collapsed .tool-btn,
+.toolbar.collapsed .action-btn {
+    padding: 8px;
+    justify-content: center;
+}
+
+/* Sidebar Toggle Button */
+/* Modern Sidebar Toggle (Floating Vertical Handle) */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 64px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-left: none;
+    color: var(--text-main);
+    border-radius: 0 12px 12px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-toggle-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-100%);
+}
+
+.sidebar-toggle-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    width: 40px;
+}
+
+/* Sidebar Collapse Button (inside brand) */
+.sidebar-collapse-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+/* Collapsible Elements Section */
+.elements-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 4px 4px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.elements-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.elements-chevron {
+    transition: transform 0.25s ease;
+}
+
+.elements-chevron.rotated {
+    transform: rotate(-90deg);
+}
+
+.elements-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.elements-body.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Tab Rename Button */
+.tab-rename {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 0 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.tab-rename:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    color: var(--primary);
+}
+
+.brand h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.tools-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.tools-group h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-left: 8px;
+}
+
+.tools-group.bottom {
+    margin-top: auto;
+    margin-bottom: 0px;
+}
+
+button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+    background-color: var(--border-light);
+    color: var(--text-main);
+}
+
+button.active {
+    background-color: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+}
+
+.action-btn {
+    background-color: var(--border-light);
+    color: var(--text-main);
+    width: 100%;
+}
+
+.action-btn:hover {
+    background-color: var(--border-color);
+}
+
+.action-btn.primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Canvas Area */
+.canvas-container {
+    flex: 1;
+    position: relative;
+    background-color: var(--bg-canvas);
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+canvas.tool-select {
+    cursor: default;
+}
+
+canvas.tool-pan {
+    cursor: grab;
+}
+
+canvas.tool-pan:active {
+    cursor: grabbing;
+}
+
+/* Floating Properties Panel */
+.properties-panel {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 250px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.properties-panel.hidden {
+    display: none;
+}
+
+.properties-panel h3 {
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.properties-panel>* {
+    pointer-events: auto;
+}
+
+#selection-info {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* Setting Items */
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 8px;
+}
+
+.setting-item label {
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    transition: background .15s ease-in-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--primary-hover);
+}
+
+span[id$="-val"] {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 32px;
+}
+
+/* Compass Overlay */
+.compass-overlay {
+    position: absolute;
+    top: 24px;
+    right: 300px;
+    width: 64px;
+    height: 64px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.compass-ring {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-radius: 50%;
+    border: 2px solid rgba(99, 102, 241, 0.2);
+}
+
+.compass-label {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+}
+
+.compass-label.n {
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--primary);
+}
+
+.compass-label.s {
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.compass-label.e {
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.compass-label.w {
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.compass-needle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(to top, #94a3b8 50%, var(--primary) 50%);
+    transform: translate(-50%, -50%);
+    border-radius: 2px;
+}
+
+/* Right Sidebar - Removed, replaced by floating editor */
+
+/* Tab Bar */
+.tab-bar {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 0;
+    height: 38px;
+    display: flex;
+    align-items: stretch;
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 20;
+    padding: 0 4px;
+    gap: 0;
+    user-select: none;
+}
+
+.tab-list {
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex: 1;
+    scrollbar-width: none;
+}
+
+.tab-list::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border-right: 1px solid var(--border-color);
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 100px;
+    max-width: 200px;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+}
+
+.tab:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+}
+
+.tab.active {
+    background: var(--bg-canvas);
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+}
+
+.tab-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.tab-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    padding: 0 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.tab-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--danger);
+}
+
+.tab-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    min-width: 34px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 0;
+    padding: 0;
+}
+
+.tab-add:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--primary);
+}
+
+/* Properties Panel Header & Minimize */
+.properties-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.properties-header h3 {
+    font-size: 14px;
+    color: var(--text-main);
+    font-weight: 600;
+    margin: 0;
+}
+
+.prop-minimize-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prop-minimize-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.properties-body {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.properties-body.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Floating Live Editor Window */
+.floating-editor {
+    position: fixed;
+    bottom: 24px;
+    left: 284px;
+    width: 600px;
+    height: 400px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    z-index: 500;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+}
+
+/* Modals & documentation */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: var(--text-main);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header h3 {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 24px;
+    line-height: 1.6;
+}
+
+.modal-body h4 {
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+
+.modal-body p {
+    margin-bottom: 20px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.shortcuts-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.shortcuts-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 14px;
+}
+
+kbd {
+    background: var(--border-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 2px 0 var(--border-light);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.floating-editor-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
+    cursor: grab;
+    user-select: none;
+}
+
+.floating-editor-titlebar:active {
+    cursor: grabbing;
+}
+
+.floating-editor-titlebar h3 {
+    font-size: 13px;
+    color: var(--text-main);
+    letter-spacing: 0.3px;
+    margin: 0;
+}
+
+.floating-editor-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 2px 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.floating-editor-close:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+
+.floating-editor .code-editor {
+    flex: 1;
+    background: #0f0f13;
+    color: #c7d2fe;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 16px;
+    border: none;
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+}
+
+.floating-editor-resize {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    cursor: nwse-resize;
+    background: linear-gradient(135deg, transparent 50%, var(--border-color) 50%);
+    border-radius: 0 0 10px 0;
+}
+
+.status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.status-badge.success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Canvas offset for tab bar */
+.canvas-container canvas {
+    margin-top: 38px;
+    height: calc(100% - 38px) !important;
+}
+
+
+/* Authentication System Polishes */
+@keyframes modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#modal-auth {
+    animation: modal-appear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(30, 30, 34, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#modal-auth .action-btn:active {
+    transform: scale(0.98);
+}
+
+.spinner {
+    border-right-color: transparent !important;
+}
+
+#modal-auth input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-light #modal-auth {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-light #modal-auth input {
+    background: rgba(0, 0, 0, 0.03);
+    color: #000;
+}
+
+
+/* ================================================================
+   CROSS-BROWSER COMPATIBILITY (Edge, Chrome, Safari, Firefox)
+   ================================================================ */
+
+/* Safari backdrop-filter support */
+.toolbar,
+.properties-panel,
+.compass-widget,
+.compass-overlay,
+.floating-editor,
+.modal-backdrop,
+#modal-auth {
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Firefox range input thumb */
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: none;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: var(--primary-hover);
+}
+
+input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    border: none;
+}
+
+/* Safari smooth scrolling fix */
+.tab-list,
+.toolbar,
+.properties-panel {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on interactive elements (all browsers) */
+.toolbar,
+.win-menu-bar,
+.tab-bar,
+.zoom-controls {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Safe area insets for iOS notch/bottom bar */
+.main-wrapper {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* Prevent touch callout on canvas (Safari) */
+canvas {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+/* ================================================================
+   MOBILE HAMBURGER TOGGLE
+   ================================================================ */
+.mobile-toolbar-toggle {
+    display: none;
+    position: fixed;
+    top: 40px;
+    left: 8px;
+    z-index: 3000;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--panel-bg);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 20px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.mobile-toolbar-toggle:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* ================================================================
+   RESPONSIVE: TABLETS (iPad, 768px – 1024px)
+   ================================================================ */
+@media screen and (max-width: 1024px) {
+    .toolbar {
+        width: 220px;
+        padding: 12px;
+        padding-top: 44px;
+    }
+
+    .brand h1 {
+        font-size: 18px;
+    }
+
+    .brand {
+        margin-bottom: 24px;
+    }
+
+    .properties-panel {
+        width: 220px;
+        right: 12px;
+        top: 12px;
+        padding: 14px;
+    }
+
+    .compass-overlay {
+        right: 244px;
+        width: 52px;
+        height: 52px;
+    }
+
+    .floating-editor {
+        width: 400px;
+        height: 300px;
+        left: 240px;
+    }
+
+    button {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .tools-group {
+        margin-bottom: 20px;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE: MOBILE (< 768px)
+   ================================================================ */
+@media screen and (max-width: 768px) {
+
+    /* Show hamburger toggle */
+    .mobile-toolbar-toggle {
+        display: flex;
+    }
+
+    /* Menu bar compact */
+    .win-menu-bar {
+        height: 40px;
+        font-size: 12px;
+        padding: 0 4px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .menu-item {
+        padding: 0 6px;
+        white-space: nowrap;
+    }
+
+    /* Hide dropdown menus behind tap on mobile */
+    .dropdown-menu {
+        min-width: 160px;
+    }
+
+    .app-container {
+        height: calc(100vh - 40px);
+        height: calc(100dvh - 40px);
+        /* Dynamic viewport for mobile address bar */
+    }
+
+    .main-wrapper {
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    /* Sidebar: hidden by default, shown when toggled */
+    .toolbar {
+        position: fixed;
+        top: 40px;
+        left: 0;
+        width: 260px;
+        height: calc(100vh - 40px);
+        height: calc(100dvh - 40px);
+        padding: 12px;
+        padding-top: 16px;
+        z-index: 2500;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .toolbar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle-btn {
+        display: none;
+    }
+
+    .brand h1 {
+        font-size: 18px;
+    }
+
+    .brand {
+        margin-bottom: 16px;
+    }
+
+    /* Properties panel: bottom sheet on mobile */
+    .properties-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        max-height: 35vh;
+        border-radius: 16px 16px 0 0;
+        padding: 16px;
+        z-index: 2400;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Compass: smaller and repositioned */
+    .compass-overlay {
+        right: 12px;
+        top: auto;
+        bottom: 60px;
+        width: 48px;
+        height: 48px;
+    }
+
+    .compass-label {
+        font-size: 8px;
+    }
+
+    .compass-needle {
+        height: 18px;
+    }
+
+    /* Tab bar: scrollable */
+    .tab-bar {
+        left: 0;
+        height: 34px;
+    }
+
+    .tab {
+        min-width: 80px;
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    /* Canvas offset for smaller tab bar */
+    .canvas-container canvas {
+        margin-top: 34px;
+        height: calc(100% - 34px) !important;
+    }
+
+    /* Zoom controls: compact */
+    .zoom-controls {
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+
+    .zoom-controls .tool-btn {
+        padding: 6px !important;
+    }
+
+    #zoom-val {
+        width: 40px !important;
+        font-size: 11px !important;
+    }
+
+    /* Logo overlay: smaller */
+    .app-logo-overlay {
+        bottom: 36px !important;
+        right: 12px !important;
+    }
+
+    .app-logo-overlay img {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 14px !important;
+    }
+
+    /* Floating editor: full-width bottom sheet */
+    .floating-editor {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 50vh;
+        border-radius: 16px 16px 0 0;
+    }
+
+    /* Modals: near full screen */
+    .modal {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    /* Toolbar buttons: larger touch targets */
+    button {
+        padding: 12px 14px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+
+    .tab-close {
+        min-height: auto;
+        padding: 4px;
+    }
+
+    .tab-rename {
+        min-height: auto;
+    }
+
+    /* Mobile overlay backdrop for sidebar */
+    .mobile-sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 40px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 2400;
+    }
+
+    .mobile-sidebar-backdrop.visible {
+        display: block;
+    }
+
+    /* Brand bar on right */
+    .nav-brand-text {
+        font-size: 12px !important;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE: SMALL MOBILE (< 480px)
+   ================================================================ */
+@media screen and (max-width: 480px) {
+    .toolbar {
+        width: 100%;
+    }
+
+    .properties-panel {
+        max-height: 40vh;
+    }
+
+    .floating-editor {
+        height: 60vh;
+    }
+
+    .brand h1 {
+        font-size: 16px;
+    }
+
+    .win-menu-bar {
+        font-size: 11px;
+    }
+
+    .menu-shortcut {
+        display: none;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE: LANDSCAPE MOBILE
+   ================================================================ */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .toolbar {
+        padding-top: 8px;
+        gap: 8px;
+    }
+
+    .brand {
+        margin-bottom: 8px;
+    }
+
+    .tools-group {
+        margin-bottom: 8px;
+    }
+
+    button {
+        padding: 8px 12px;
+        min-height: 36px;
+    }
+
+    .properties-panel {
+        max-height: 50vh;
+    }
+}
