@@ -77,8 +77,9 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
     activeTabIdRef.current = activeTabId;
     canvasBgColorRef.current = canvasBgColor;
     if (engineRef.current) {
-      engineRef.current.bgColor = canvasBgColor;
-      engineRef.current.render();
+      const engine = engineRef.current as any;
+      engine.bgColor = canvasBgColor;
+      engine.render();
     }
   }, [tabs, activeTabId, canvasBgColor]);
 
