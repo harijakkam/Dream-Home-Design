@@ -155,12 +155,13 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const handleSave = () => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     const project = {
       v: 1.1,
       name: 'SketchMyHome Design',
       engine: 'NextJS',
-      scene: engineRef.current.scene
+      scene: engine.scene
     };
     const jsonStr = JSON.stringify(project, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -183,80 +184,87 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const handleThicknessChange = (val: number) => {
-    if (!engineRef.current) return;
-    const pxVal = Math.round(val * (engineRef.current.gridSize / 12) * 100) / 100;
+    const engine = engineRef.current;
+    if (!engine) return;
+    const pxVal = Math.round(val * (engine.gridSize / 12) * 100) / 100;
 
-    engineRef.current.selectedItems.forEach((item: any) => {
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'wall') {
         item.thickness = pxVal;
       }
     });
 
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleLineTypeChange = (val: string) => {
-    if (!engineRef.current) return;
-    engineRef.current.selectedItems.forEach((item: any) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'wall') {
         item.lineType = val;
       }
     });
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleRotationChange = (val: number) => {
-    if (!engineRef.current) return;
-    engineRef.current.selectedItems.forEach((item: any) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'object') {
         item.rotation = val;
       }
     });
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleTextContextChange = (text: string) => {
-    if (!engineRef.current) return;
-    engineRef.current.selectedItems.forEach((item: any) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'object' && item.subType === 'text') {
         item.text = text;
       }
     });
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleTextSizeChange = (size: number) => {
-    if (!engineRef.current) return;
-    engineRef.current.selectedItems.forEach((item: any) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'object' && item.subType === 'text') {
         item.fontSize = size;
       }
     });
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleAltitudeChange = (val: number) => {
-    if (!engineRef.current) return;
-    engineRef.current.selectedItems.forEach((item: any) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.selectedItems.forEach((item: any) => {
       if (item.type === 'wall') {
         item.altitude = val;
       }
     });
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const handleLengthChange = (valFeet: number) => {
-    if (!engineRef.current || isNaN(valFeet)) return;
-    const item = engineRef.current.selectedItems[0];
+    const engine = engineRef.current;
+    if (!engine || isNaN(valFeet)) return;
+    const item = engine.selectedItems[0];
     if (!item || item.type !== 'wall') return;
 
-    const pxLen = valFeet * engineRef.current.gridSize;
+    const pxLen = valFeet * engine.gridSize;
     const dx = item.endX - item.startX;
     const dy = item.endY - item.startY;
     const angle = Math.atan2(dy, dx);
@@ -264,8 +272,8 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
     item.endX = item.startX + Math.cos(angle) * pxLen;
     item.endY = item.startY + Math.sin(angle) * pxLen;
 
-    engineRef.current.render();
-    setSelectedItems([...engineRef.current.selectedItems]);
+    engine.render();
+    setSelectedItems([...engine.selectedItems]);
   };
 
   const getInchesFromPx = (px: number) => {
@@ -274,11 +282,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const handleNewDesign = () => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     if (confirm('Are you sure you want to start a new design? All unsaved changes will be lost.')) {
-      engineRef.current.scene = [];
-      engineRef.current.undoStack = [];
-      engineRef.current.render();
+      engine.scene = [];
+      engine.undoStack = [];
+      engine.render();
       setSelectedItems([]);
       setActiveMenu(null);
     }
@@ -286,14 +295,16 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
 
   const handleOpenFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !engineRef.current) return;
+    const engine = engineRef.current;
+    if (!file || !engine) return;
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target?.result as string);
         if (data.scene) {
-          engineRef.current.scene = data.scene;
-          engineRef.current.render();
+          engine.scene = data.scene;
+          engine.render();
         }
       } catch (err) {
         alert('Failed to load project file.');
@@ -304,10 +315,11 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const handleExportPNG = async () => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     try {
       // @ts-ignore
-      const dataUrl = await engineRef.current.exportToDataURL('SketchMyHome Design');
+      const dataUrl = await engine.exportToDataURL('SketchMyHome Design');
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = `SketchMyHome_${Date.now()}.png`;
@@ -319,28 +331,31 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   };
 
   const toggleGrid = () => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     const newState = !showGrid;
     setShowGrid(newState);
-    engineRef.current.showGrid = newState;
-    engineRef.current.render();
+    engine.showGrid = newState;
+    engine.render();
     setActiveMenu(null);
   };
 
   const toggleVastu = () => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     const newState = !showVastu;
     setShowVastu(newState);
-    engineRef.current.showVastu = newState;
-    engineRef.current.render();
+    engine.showVastu = newState;
+    engine.render();
     setActiveMenu(null);
   };
 
   const handleUpdateNorthAngle = (angle: number) => {
-    if (!engineRef.current) return;
+    const engine = engineRef.current;
+    if (!engine) return;
     setNorthAngle(angle);
-    engineRef.current.northAngle = angle;
-    engineRef.current.render();
+    engine.northAngle = angle;
+    engine.render();
   };
 
   const handleLoginSubmit = async (e: React.FormEvent): Promise<void> => {
