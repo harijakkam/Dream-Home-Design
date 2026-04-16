@@ -22,3 +22,4 @@ v3.0/
 # Misc
 outputs/
 *.log
+*.next/
