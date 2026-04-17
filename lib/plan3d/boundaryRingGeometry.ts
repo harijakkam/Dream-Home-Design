@@ -65,8 +65,8 @@ export function createBoundaryRingGeometry(
   if (!canvasPts || canvasPts.length < 3) return null;
 
   const s = 1 / gridPxPerFoot;
-  /** Match `canvasPxToPlan3DFt`: canvas Y-down → plan Z (shape Y before rotateX becomes world Z). */
-  const pts = canvasPts.map((p) => new THREE.Vector2(p.x * s, -p.y * s));
+  /** Local shape (x·s, y·s) ft; after `rotateX(-π/2)` world Z = -shapeY = zFt = -y·s — same as walls. */
+  const pts = canvasPts.map((p) => new THREE.Vector2(p.x * s, p.y * s));
 
   let cx = 0;
   let cy = 0;

@@ -158,6 +158,9 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
   /** Pick room category before drawing the room polygon. */
   const [showRoomTypeModal, setShowRoomTypeModal] = useState(false);
 
+  /** Pulse “Room is ready” after a room outline is closed until the user acts or timeout. */
+  const [roomReadyButtonBlink, setRoomReadyButtonBlink] = useState(false);
+
   // Design Tabs State
   const [tabs, setTabs] = useState<DesignTab[]>([
     { id: 0, name: 'Ground floor', scene: [], floorIndex: 0, elevationFt: 0 },
@@ -195,6 +198,10 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
       // Sync selection state with React
       engineRef.current.onSelectionChange = (items: any[]) => {
         setSelectedItems([...items]);
+      };
+
+      (engineRef.current as any).onRoomOutlineCompleted = () => {
+        setRoomReadyButtonBlink(true);
       };
 
       // [Phase 1] Attempt to load local auto-save data on initialization
@@ -354,6 +361,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
     return () => window.removeEventListener('keydown', onKey);
   }, [showWallHeightModal, showDoorHeightModal, showWindowHeightModal, showRoomTypeModal]);
 
+  useEffect(() => {
+    if (!roomReadyButtonBlink) return;
+    const t = window.setTimeout(() => setRoomReadyButtonBlink(false), 14000);
+    return () => clearTimeout(t);
+  }, [roomReadyButtonBlink]);
+
   const confirmRoomType = (roomTypeId: string) => {
     const tools = toolsRef.current;
     const engine = engineRef.current;
@@ -376,10 +389,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
     }
     setShowRoomTypeModal(false);
     setLayoutHint(null);
+    setRoomReadyButtonBlink(false);
     setActiveTool('room');
   };
 
   const handleRoomReadyBuildWalls = () => {
+    setRoomReadyButtonBlink(false);
     const engine = engineRef.current;
     if (!engine) return;
 
@@ -1469,8 +1484,12 @@ export default function SketchMyHomeDesigner({ initialUser }: { initialUser: App
           <button
             type="button"
             onClick={handleRoomReadyBuildWalls}
-            className="flex items-center gap-1.5 rounded-md border border-emerald-400/35 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-100 hover:bg-emerald-500/25"
-            title="Create wall segments along each selected room outline (or all rooms if none selected). Replaces walls previously generated from the same room."
+            className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-medium transition-[box-shadow,background-color,border-color] duration-300 ${
+              roomReadyButtonBlink
+                ? 'animate-pulse border-emerald-200 bg-emerald-400/35 text-white shadow-[0_0_20px_rgba(52,211,153,0.55)] ring-2 ring-emerald-300/95 hover:bg-emerald-400/45'
+                : 'border-emerald-400/35 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25'
+            }`}
+            title="Create wall segments along each selected room outline (or all rooms if none selected). After you close a room outline, this button pulses until you click it."
           >
             <Home size={14} className="opacity-90" />
             Room is ready

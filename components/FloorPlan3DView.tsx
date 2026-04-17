@@ -227,10 +227,11 @@ function LotFloorFill({
     if (points.length < 3) return null;
     const s = 1 / gridPxPerFoot;
     const shape = new THREE.Shape();
-    // Same XZ mapping as `canvasPxToPlan3DFt` (canvas Y-down → negate for shape plane before rotateX).
-    shape.moveTo(points[0].x * s, -points[0].y * s);
+    // Shape is drawn in local XY, then `rotateX(-π/2)` maps vertex (sx, sy, 0) → world Z = -sy.
+    // Plan Z from canvas is zFt = -y·s, so use sy = y·s (same feet as walls from `canvasPxToPlan3DFt`).
+    shape.moveTo(points[0].x * s, points[0].y * s);
     for (let i = 1; i < points.length; i++) {
-      shape.lineTo(points[i].x * s, -points[i].y * s);
+      shape.lineTo(points[i].x * s, points[i].y * s);
     }
     shape.closePath();
     const geom = new THREE.ShapeGeometry(shape);
